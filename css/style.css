@@ -1,0 +1,66 @@
+/*用户量*/
+.UserNum>.layui-row>.layui-col-md6>.grid-demo{
+	margin-bottom: 10px;
+	margin-right: 10px;
+	border: 1px solid #EEEEEE;
+	padding: 10px;
+}
+
+.UserNum>.layui-row>.layui-col-md6>.grid-demo>h3{
+	font-size: 16px;
+}
+
+.UserNum>.layui-row>.layui-col-md6>.grid-demo>h1{
+	margin: 20px auto;
+	font-size: 40px;
+	color: #009688;
+}
+
+/*平台总成交量*/
+.total-transaction{
+	height: 242px;
+}
+.total-transaction>.layui-row>.layui-col-md12>.grid-demo>h1{
+	font-size: 80px;
+	color: #009688;
+	margin: 100px;
+}
+/*知识产品*/
+.Knowledge-products>.layui-card>.layui-card-header>span,.Knowledge-demand>.layui-card>.layui-card-header>span{
+	color: #009688;
+	margin: auto 10px;
+}
+/*个人加入作者详情*/
+.Personal-Toexamine,.company-Toexamine{
+	padding: 30px;
+}
+.Personal-Toexamine>h1,.company-Toexamine>h1,.demand-details>h1,
+.Personal-Toexamine>h1,.Productsales>h1,.productbrowsing>h1,.system>h1,.Knowledgeproducts>h1{
+	text-align: center;
+	font-size: 35px;
+}
+.banner{
+	text-align: center;
+}
+.banner>h1{
+	font-size: 36px;
+}
+.nav-tree{
+	background: #009688;
+	color: #FFFFFF;
+}
+.demoTable>.layui-inline{
+	margin-right: 20px;
+}
+.layui-layout-admin .layui-logo {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 200px;
+    height: 100%;
+    line-height: 60px;
+    text-align: center;
+    color: #009688;
+    font-size: 30px;
+    letter-spacing: 6px;
+}

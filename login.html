@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+		<title>猿知识后台登陆</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<link rel="stylesheet" type="text/css" href="css/layui.css" />
+		<link rel="stylesheet" type="text/css" href="./css/modules/layer/default/layer.css" />
+		<script type="text/javascript" src="js/layui.js">
+		</script>
+		<script type="text/javascript" src="js/lay/modules/layer.js">
+		</script>
+		
+		<style type="text/css">
+			.login {
+				width: 400px;
+				height: 300px;
+				margin: auto;
+				margin-top: 10%;
+				background: #FFFFFF;
+				padding-top: 20px;
+			}
+			
+			.login>form {
+				width: 80%;
+				margin: auto;
+				padding-top: 30px;
+			}
+			
+			.layui-input-block {
+				margin-left: 80px;
+				min-height: 36px;
+			}
+			
+			.layui-form-label {
+				width: 50px;
+				float: left;
+				text-align: left;
+			}
+		</style>
+	</head>
+
+	<body style="background: #EEEEEE;">
+		<div class="login">
+			<h1 style="text-align: center;">登录</h1>
+			<form class="layui-form" action="">
+				<div class="layui-form-item">
+					<label class="layui-form-label">账号:</label>
+					<div class="layui-input-block">
+						<input type="text" name="account" value="" lay-verify="required" autocomplete="off" placeholder="请输入账号" class="layui-input admin-input-username">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">密码:</label>
+					<div class="layui-input-block">
+						<input type="password" name="psw" value="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input admin-input-password">
+					</div>
+				</div>
+				<div class="layui-form-item" style="margin-top: 30px;">
+					<div class="layui-input-block">
+
+						<button class="layui-btn" lay-submit="" lay-filter="demo1">立即登录</button>
+						<!--<a href="index.html"  class="layui-btn">立即登陆</a>-->
+						<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<script>
+			layui.config({
+				base: './js/' //静态资源所在路径
+			}).extend({
+				setter: 'config' //配置模块
+			}).use(['setter', 'form'], function() {
+				var form = layui.form,
+					layer = layui.layer;
+				var setter = layui.setter;
+				var $ = layui.$; //layui内置的jquery
+
+				//监听提交
+				form.on('submit(demo1)', function(data) {
+					var url = setter.requestUrl + '/public/backstage/login'
+					var parsm = data.field;
+
+					var successMsg = "登录成功";
+					var failureMsg = "登录失败";
+					saveForm(url, parsm, successMsg, failureMsg)
+					return false;
+				});
+
+				//保存表单
+				function saveForm(url, parsm, successMsg, failureMsg) {
+					$.ajax({
+						url: url,
+						type: "POST",
+						data: JSON.stringify(parsm),
+						dataType: "JSON",
+						contentType: "application/json",
+						success: function(data) {
+							if(data.data) { //登陆成功
+								//登入成功的提示与跳转
+								var tokenType = data.data.user.oauth.token_type;
+								var token = data.data.user.oauth.access_token;
+								sessionStorage.clear();
+								sessionStorage.setItem("tokenType", tokenType);
+								sessionStorage.setItem("token", token);
+								//设置user_id
+								layui.sessionData(setter.tableName, {
+									key: "user_id",
+									value: data.data.user.user_id
+								});
+								
+								layer.msg(successMsg, {
+									offset: '15px',
+									icon: 1,
+									time: 1000
+								}, function() {
+									location.href = 'index.html'; //后台主页
+								console.log(token);
+								console.log(data.data);
+								});
+							} else {
+								console.log(data);
+								layer.alert(failureMsg, {
+									icon: 2
+								}, function(index) {
+									layer.close(index);
+								})
+							}
+						} //end success
+					}); //end ajax
+				}
+
+			});
+		</script>
+		<script type="text/javascript" src="js/config.js"></script>
+	</body>
+
+</html>

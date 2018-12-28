@@ -1,0 +1,79 @@
+<html>
+
+	<head>
+		<title></title>
+		<meta name="" charset="utf-8" content=""/>
+		<link rel="stylesheet" type="text/css" href="../css/layui.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/modules/layer/default/layer.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/modules/laydate/default/laydate.css"/>
+		<script type="text/javascript" src="../js/layui.js">		</script>
+		<script type="text/javascript" src="../js/lay/modules/laydate.js">		</script>
+	</head>
+
+	<body>
+		<form class="layui-form" action="">
+
+			<div class="layui-inline">
+				<label class="layui-form-label">验证日期</label>
+				<div class="layui-input-inline">
+					<input type="text" name="date" id="date" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<div class="layui-input-block">
+					<button class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+					<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+				</div>
+			</div>
+		</form>
+
+		<script type="text/javascript" src="../js/layui.js">		</script>
+		<script>
+			layui.use(['form', 'layedit', 'laydate'], function() {
+				var form = layui.form,
+					layer = layui.layer,
+					layedit = layui.layedit,
+					laydate = layui.laydate;
+
+				//日期
+				laydate.render({
+					elem: '#date',
+					type: 'time',
+					format: 'H:m:s'
+				});
+
+				/**
+				 * 时间转为秒
+				 * @param time 时间(00:00:00)
+				 * @returns {string} 时间戳（单位：秒）
+				 */
+				var time_to_sec = function(time) {
+					var s = '';
+
+					var hour = time.split(':')[0];
+					var min = time.split(':')[1];
+					var sec = time.split(':')[2];
+
+					s = Number(hour * 3600) + Number(min * 60) + Number(sec);
+
+					return s;
+				};
+
+				//监听提交
+				form.on('submit(demo1)', function(data) {
+					var date = time_to_sec(data.field.date);
+
+					console.log(date);
+					layer.alert(JSON.stringify(data.field), {
+						title: '最终的提交信息'
+					})
+					return false;
+				});
+
+			});
+		</script>
+
+	</body>
+
+</html>

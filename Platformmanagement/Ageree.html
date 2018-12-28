@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>用户协议</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+		<link rel="stylesheet" type="text/css" href="../css/layui.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/layer/default/layer.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/laydate/default/laydate.css" />
+		<script type="text/javascript" src="../js/jquery-3.1.1.min.js">
+		</script>
+		<script type="text/javascript" src="../js/layui.js">
+		</script>
+		<script type="text/javascript" src="../js/cos-js-sdk-v5.js">
+		</script>
+		<script type="text/javascript" src="../js/lay/modules/laydate.js">
+		</script>
+		<script type="text/javascript" src="../js/url-config.js">		</script>
+		<style type="text/css">
+			.layui-input-block {
+				margin-left: 130px;
+				min-height: 36px;
+			}
+			
+			.layui-form-label {
+				width: 120px;
+				padding: 0px;
+			}
+		</style>
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header">
+				<div class="layui-logo">猿知识</div>
+				<!-- 头部区域（可配合layui已有的水平导航） -->
+
+				
+			</div>
+
+			<div class="layui-side layui-bg-black">
+				<div class="layui-side-scroll">
+					<div id="tree" style=" width: 200px;">
+					</div>
+				<script>
+						loadMenuTree();
+
+						layui.use('element', function() {
+							var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+							var layer = layui.layer;
+							//监听导航点击
+							element.on('nav(demo)', function(elem) {
+								//记录节点Id
+								var id = elem.attr('id');
+								var mid = 'menu' + id;
+								//在cookie中查找响应的节点
+								var c = getCookie(mid);
+
+								//alert(obj.className);
+								//如果找不到对应cookie则增加,找到则删除
+								if(c == null) {
+									var obj = document.getElementById(mid);
+									var count = parseInt(obj.getAttribute('count'));
+									if(count > 0)
+										setCookie(mid, escape(obj.className));
+									else {
+										setCookie('selMenuId', escape(mid));
+										setCookie('selMenuClass', escape(obj.className));
+									}
+
+								} else {
+									deleteCookie(mid);
+								}
+
+							});
+						});
+
+						//加载菜单树
+						function loadMenuTree() {
+
+							var m;
+
+							var url = b_url + '/backstage/menus/tree'; ///backstage
+							$.get(url, function(data) {
+								m = data;
+								createMenu(m);
+
+								$("#tree").html(menuStr);
+
+								setMenu();
+								//重新渲染
+								layui.use('element', function() {
+									var element = layui.element;
+									element.render('nav');
+								});
+							});
+						}
+						//设置菜单选中状态
+						function setMenu() {
+							var arr;
+							var obj;
+							var strcookie = document.cookie;
+							//将多cookie切割为多个名/值对
+							var arrcookie = strcookie.split("; ");
+							//遍历cookie数组，处理每个cookie对
+							for(var i = 0; i < arrcookie.length; i++) {     
+								arr = arrcookie[i].split("=");
+								obj = document.getElementById(arr[0]);
+								if(obj != null) {
+									obj.className = unescape(arr[1]);
+								}
+							}
+
+							var selMenuId = getCookie('selMenuId');
+							var selMenuClass = getCookie('selMenuClass');
+							if(selMenuId != null && selMenuClass != null) {
+								obj = document.getElementById(selMenuId);
+								obj.className = unescape(selMenuClass);
+							}
+						}
+					</script>
+
+				</div>
+			</div>
+			<div class="layui-body">
+				<div class="layui-bodys">
+					<div style="padding-bottom: 10px;">
+						<button class="layui-btn  ADD_types">添加协议类型</button>
+						<a href="AgereeAdd.html" class="layui-btn">添加协议</a>
+					</div>
+
+					<div style="width: 35%; float: left;">
+						<table class="layui-hide" id="personal" lay-filter="personal"></table>
+						<script type="text/html" id="type_colstoolbar">
+							<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+							<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+						</script>
+					</div>
+
+					<div style="width: 64%; padding-left: 1%; float: left;">
+						<table class="layui-hide" id="cold" lay-filter="cold"></table>
+						<script type="text/html" id="checkboxTpl">
+							<input type="checkbox" name="lock" value="{{d.id}}" title="启用" lay-filter="lockRem" {{ d.is_enable ? 'checked' : '' }}>
+						</script>
+						<script type="text/html" id="colstoolbar">
+							<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+						</script>
+					</div>
+					
+					<div style="float: left; width:100%;">
+						 <blockquote class="layui-elem-quote">
+						 	注意：<br />
+						 	1.先添加协议类型<br />
+						 	2.添加协议选择协议类型<br />
+						 	3.不可轻易删除协议类型，前端固定了协议ID
+						 </blockquote>
+					</div>
+					<!-- 协议类型 -->
+					<script>
+						layui.config({
+							base: '../js/' //静态资源所在路径
+						}).extend({
+							setter: 'config' //配置模块
+						}).use(['setter', 'util', 'table', 'form', 'upload', 'laydate', 'common'], function() {
+							var setter = layui.setter;
+							var table = layui.table;
+							var util = layui.util; //工具集
+							var form = layui.form;
+							var upload = layui.upload;
+							var laydate = layui.laydate;
+							var common = layui.common;
+							var element = layui.element; 
+
+							//方法级渲染
+							table.render({
+								elem: '#personal',
+								headers: {
+									Authorization: setter.askToken()
+								},
+
+								url: setter.requestUrl + '/backstage/agreement_types/search',
+								cols: [
+									[{
+											field: 'id',
+											title: 'id',
+											width: 100
+										}, {
+											field: 'type_code',
+											title: '类型编码',
+											width: 100
+										}, {
+											field: 'type_name',
+											title: '类型名字',
+										}, {
+											title: '操作',
+											fixed: 'right',
+											width: 120,
+											align: 'center',
+											toolbar: '#type_colstoolbar'
+										}
+
+									]
+								],
+								//height: 'full-210' //高度最大化减去差值
+								page: {
+									layout: ['prev', 'page', 'next', 'skip', 'count']
+								},
+								limit: 15,
+								request: {
+									limitName: 'size' //每页数据量的参数名，默认：limit
+								},
+								parseData: function(res) { //res 即为原始返回的数据
+									if(res.data) {
+										//返回有data 数据，就设置code 为0=请求数据成功
+										res.code = 0
+									} else {
+										res.message = "暂无相关数据"
+										res.data = {
+											total: 0
+										}
+									}
+									return {
+										"code": res.code, //解析接口状态
+										"msg": res.message, //解析提示文本
+										"count": res.data.total, //解析数据长度
+										"data": res.data.agreementTypes
+									}
+								},
+
+							});
+							var tabIndex; //修改协议类型信息
+							function openAdv(data) {
+								tabIndex = layer.open({
+									title: "修改信息",
+									type: 1,
+									area: ['600px', '450px'],
+									content: ['<div style="padding:20px;">',
+										'<form  class="layui-form" lay-filter="advForm">',
+										'<div class="layui-form-item">',
+										' <label class="layui-form-label">类型编码：</label>',
+										' <div class="layui-input-block">',
+										' <input type="text" name="type_code"  autocomplete="off" placeholder="" class="layui-input">',
+										'  </div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										' <label class="layui-form-label">类型名字：</label>',
+										' <div class="layui-input-block">',
+										' <input type="text" name="type_name" autocomplete="off" placeholder="" class="layui-input">',
+										'  </div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
+										'	</div>', '</div>',
+										'</form>',
+										'</div>'
+									].join(''),
+									success: function(layero, index) {
+										form.render(); //渲染单选框									
+										form.val('advForm', data) //赋值表单
+										updateAdForm(data); //新增协议类型
+									}
+								});
+							}
+						
+								//保存协议类型表单
+							function saveUpdateForm(url, parsm, successMsg, failureMsg) {
+								common.put(url, parsm,function(result) {
+									console.log(result)
+										if(result.code == 202) { //202 修改成功
+											layer.alert(successMsg, {
+												icon: 1
+											}, function(index) {
+											//	layer.close(index);
+												//重载表格
+												table.reload('index');
+											//	layer.close(tabIndex);
+												
+											})
+										} else {
+											layer.alert(failureMsg, {
+												icon: 2
+											}, function(index) {
+												layer.close(index);
+												layer.close(tabIndex);
+											})
+										}
+									});
+							}
+
+
+							//修改协议类型
+							function updateAdForm(field) {
+								//监听表单提交事件
+								form.on('submit(btn_save)', function(data) {
+									var url = setter.requestUrl + "/backstage/agreement_types/" + field.id;
+									var parsm = data.field
+								    parsm.user_id=setter.user_id(setter.tableName)
+									var successMsg = "成功";
+									var failureMsg = "类型编码不能和原先的一样";
+									console.log(url, JSON.stringify(parsm));
+									saveUpdateForm(url, parsm, successMsg, failureMsg);
+									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+								});
+
+							}
+							//修改协议类型
+							function adForm(formName, data) {
+								var tbData = data
+								form.val(formName, data); //赋值表单
+								//监听表单提交事件
+								form.on('submit(btn_save)', function(data) {
+									var url = setter.requestUrl + "/backstage/agreement_types/"+tbData.id; //+ data.dt_id; 
+									var parsm = data.field
+									parsm.user_id=setter.user_id(setter.tableName)
+								//	user_id: setter.user_id(setter.tableName)
+									var successMsg = "成功";
+									var failureMsg = "失败";
+									console.log(url, JSON.stringify(parsm));
+									saveForm(url, parsm, successMsg, failureMsg);
+									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+								});
+
+							}
+
+							//提交修改协议类型
+							
+							function saveForm(url, parsm, successMsg, failureMsg) {
+								console.log(url, JSON.stringify(parsm));
+								common.put(url, parsm, function(result) {
+									if(result.code == 202) {
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('personal');
+											layer.close(tabIndex);
+											
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+											layer.close(tabIndex);
+										})
+									}
+								});
+							}
+
+							
+							//监听行工具事件，删除协议类型
+							table.on('tool(personal)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+								var data = obj.data //获得当前行数据
+									,
+									layEvent = obj.event; //获得 lay-event 对应的值
+								if(layEvent === 'detail') {
+									layer.msg('查看操作');
+								} else if(layEvent === 'del') {
+									layer.confirm('真的删除协议类型吗？', {
+										icon: 0
+									}, function(index) {
+										//obj.del(); //删除对应行（tr）的DOM结构
+										var url = setter.requestUrl + "/backstage/agreement_types/" + data.id;
+										var parsm = {
+											'is_delect': true,
+											'user_id':setter.user_id(setter.tableName)										
+										}
+										var successMsg = "成功";
+										var failureMsg = "失败";
+										saveDelForm(url, parsm, successMsg, failureMsg);
+										//向服务端发送删除指令
+										layer.close(index);
+									});
+								} else if(layEvent === 'edit') {
+									openAdv(data)
+								}
+							});
+
+							//新增协议类型
+							function addAdForm() {
+								//监听表单提交事件
+								form.on('submit(btn_save)', function(data) {
+									var url = setter.requestUrl + "/backstage/agreement_types";
+									var parsm = data.field
+									parsm.user_id=setter.user_id(setter.tableName)
+									var successMsg = "成功";
+									var failureMsg = "失败";
+
+									console.log(url, JSON.stringify(parsm));
+									//saveTypeAddForm(url, parsm, successMsg, failureMsg);
+									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+								});
+
+							}
+
+							//新增协议类型
+							function saveTypeAddForm(url, parsm, successMsg, failureMsg) {
+								common.post(url, parsm, function(result) {
+									if(result.code == 201 ) { //新增成功
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('personal');
+											layer.close(tabIndex); //保存成功关闭tab弹出层
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								});
+							}
+
+
+							//增加协议类型 
+							var coldLayerIndex; //弹窗
+							//弹出一个提示层
+							$('.ADD_types').on('click', function() {
+								coldLayerIndex = layer.open({
+									type: 1,
+									title: "新增协议类型",
+									area: ['500px', '350px'],
+									shadeClose: true, //点击遮罩关闭
+									content: ['<div style="padding:20px;">',
+										'<form  class="layui-form" lay-filter="addAdForm">',
+										'<div class="layui-form-item">',
+										' <label class="layui-form-label">类型编码：</label>',
+										' <div class="layui-input-block">',
+										' <input type="text" name="type_code" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
+										'  </div>',
+										' </div>',
+										'<div class="layui-form-item">',
+										' <label class="layui-form-label">类型名字：</label>',
+										' <div class="layui-input-block">',
+										' <input type="text" name="type_name" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
+										'  </div>',
+										' </div>',
+										'<div class="layui-form-item">',
+										'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
+										'	</div>', '</div>',
+										'</form>',
+										'</div>'
+									].join(''),
+									success: function(layero, index) {
+										addProtocolTypeForm();//新增协议类型
+									}
+								});
+
+							});
+
+							//删除协议类型					
+							function saveDelForm(url,parsm,successMsg, failureMsg) {
+								common.del(url, parsm, function(result) {
+									console.log(result)
+									if(result.code == 203) { //删除成功
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('personal');
+											layer.close(tabIndex); //保存成功关闭tab弹出层
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								});
+							}
+							
+							
+							
+
+							/**协议名字*/
+							//方法级渲染
+							table.render({
+								elem: '#cold',
+								headers: {
+									Authorization: setter.askToken()
+								},
+								url: setter.requestUrl + '/backstage/agreements/search',
+								cols: [
+									[{
+											field: 'id',
+											title: 'id',
+											width: 100
+										}, {
+											field: 'title',
+											title: '协议名字'
+										}, {
+											field: 'version',
+											title: '版本',
+											width: 100
+										}, {
+											field: 'type_name',
+											title: '所属类型'
+										}, {
+											field: 'last_update_time',
+											title: '最后更新时间',
+											templet: function(d) {
+												return util.toDateString(d.last_update_time)
+											}
+										}, {
+											field: 'is_enable',
+											title: '启用',
+											templet: '#checkboxTpl',
+										}, {
+											field: 'details',
+											title: '查看/更改',
+											templet: function(d) {
+												return '<a href="Ageree-Change.html?id=' + d.id + '">' + '查看'; //跳到不同ID页面内容，加载
+											}
+
+										}, {
+											title: '操作',
+											width: 120,
+											toolbar: '#colstoolbar'
+										},
+
+									]
+								],
+
+								page: true,
+								limit:15,
+								limits:[15],
+								parseData: function(res) { //res 即为原始返回的数据
+									if(res.data) {
+										//返回有data 数据，就设置code 为0=请求数据成功
+										res.code = 0
+									}else{
+										res.message="暂无相关信息";
+										res.data={total:0}
+									}
+									return {
+										"code": res.code, //解析接口状态
+										"msg": res.message, //解析提示文本
+										"count": res.data.total, //解析数据长度
+										"data": res.data.agreements
+									}
+								},
+
+							});
+							var tabIndex; //弹出层修改广告组信息
+
+							//监听行工具事件，删除协议
+							table.on('tool(cold)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+								var data = obj.data //获得当前行数据
+									,
+									layEvent = obj.event; //获得 lay-event 对应的值
+								if(layEvent === 'detail') {
+									layer.msg('查看操作');
+								} else if(layEvent === 'del') {
+									layer.confirm('真的删除这条用户协议吗？', {
+										icon: 0
+									}, function(index) {
+										//obj.del(); //删除对应行（tr）的DOM结构
+										var url = setter.requestUrl + "/backstage/agreements/" + data.id;
+										var parsm = {
+											'user_id': setter.user_id(setter.tableName)
+										}
+										var successMsg = "成功";
+										var failureMsg = "失败";
+										console.log(url, JSON.stringify(parsm));
+										saveDelForm(url, parsm, successMsg, failureMsg);
+										//向服务端发送删除指令
+										table.reload('cold');
+										layer.close(index);
+										
+									});
+								} else if(layEvent === 'edit') {
+									openAdv(data)
+								}
+							});
+
+							//新增协议类型
+							function addProtocolTypeForm() {
+								//监听表单提交事件
+								form.on('submit(btn_save)', function(data) {
+									var url = setter.requestUrl + "/backstage/agreement_types";
+									var parsm = data.field
+									parsm.user_id = setter.user_id(setter.tableName)
+									var successMsg = "成功";
+									var failureMsg = "失败";
+
+									console.log(url, JSON.stringify(parsm));
+									saveProtocolTypeForm(url, parsm, successMsg, failureMsg);//保存协议类型表单
+									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+								});
+
+							}
+
+							//保存表单
+							function saveProtocolTypeForm(url, parsm, successMsg, failureMsg) {
+								common.post(url, parsm,function(result) {
+										if(result.code == 201) { //201新增成功 
+											layer.alert(successMsg, {
+												icon: 1
+											}, function(index) {
+												//重载表格
+												table.reload('cold');
+												layer.close(index); //关闭成功提示弹框
+												layer.close(coldLayerIndex); //保存成功关闭tab弹出层
+											})
+										} else {
+											layer.alert(failureMsg, {
+												icon: 2
+											}, function(index) {
+												layer.close(index);
+											})
+										}
+									});
+							}
+
+							
+							function saveDelForm(url,parsm,successMsg, failureMsg) {
+								common.del(url, parsm, function(result) {
+									console.log(result)
+									if(result.code == 203) { //删除成功
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('cold');
+											layer.close(tabIndex); //保存成功关闭tab弹出层
+										// window.location.href="Ageree.html";
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								});
+							}
+
+							//监听启用操作//保存审核状态
+							form.on('checkbox(lockRem)', function(obj) {
+								var url = setter.requestUrl + "/backstage/agreements/" + obj.value + "/active";
+								var parsm = {
+									"user_id":  setter.user_id(setter.tableName),
+									"is_enable": obj.elem.checked
+								}
+								console.log(url, parsm)
+								common.put(url, parsm,function(result) {
+										if(result.code == 202) { //修改成功
+											layer.tips(obj.value + ' 启用' + '：' + obj.elem.checked, obj.othis);
+											layer.alert("成功", {
+												icon: 1
+											}, function(index) {
+												table.reload('cold');
+												layer.close(index);
+											})
+										} else {
+											layer.alert("失败", {
+												icon: 2
+											}, function(index) {
+												layer.close(index);
+											})
+										}
+									});
+							});
+						}); //use
+					</script>
+
+				</div>
+			</div>
+			<div class="layui-footer">
+				<!-- 底部固定区域 -->
+				© 猿知识网址
+			</div>
+		</div>
+	</body>
+
+</html>

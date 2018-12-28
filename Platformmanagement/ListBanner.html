@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>Banner管理列表</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+		<link rel="stylesheet" type="text/css" href="../css/layui.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/layer/default/layer.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/laydate/default/laydate.css" />
+		<script type="text/javascript" src="../js/jquery-3.1.1.min.js">
+		</script>
+		<script type="text/javascript" src="../js/layui.js">
+		</script>
+		<script type="text/javascript" src="../js/cos-js-sdk-v5.js">
+		</script>
+		<script type="text/javascript" src="../js/lay/modules/laydate.js">
+		</script>
+		<script type="text/javascript" src="../js/url-config.js">		</script>
+		<style type="text/css">
+			.layui-input-block {
+				margin-left: 130px;
+				min-height: 36px;
+			}
+		</style>
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header">
+				<div class="layui-logo">猿知识</div>
+				<!-- 头部区域（可配合layui已有的水平导航） -->
+
+				
+			</div>
+
+		<div class="layui-side layui-bg-black">
+				<div class="layui-side-scroll">
+					<div id="tree" style=" width: 200px;">
+					</div>
+				<script>
+						loadMenuTree();
+
+						layui.use('element', function() {
+							var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+							var layer = layui.layer;
+							//监听导航点击
+							element.on('nav(demo)', function(elem) {
+								//记录节点Id
+								var id = elem.attr('id');
+								var mid = 'menu' + id;
+								//在cookie中查找响应的节点
+								var c = getCookie(mid);
+
+								//alert(obj.className);
+								//如果找不到对应cookie则增加,找到则删除
+								if(c == null) {
+									var obj = document.getElementById(mid);
+									var count = parseInt(obj.getAttribute('count'));
+									if(count > 0)
+										setCookie(mid, escape(obj.className));
+									else {
+										setCookie('selMenuId', escape(mid));
+										setCookie('selMenuClass', escape(obj.className));
+									}
+
+								} else {
+									deleteCookie(mid);
+								}
+
+							});
+						});
+
+						//加载菜单树
+						function loadMenuTree() {
+
+							var m;
+
+							var url = b_url + '/backstage/menus/tree'; ///backstage
+							$.get(url, function(data) {
+								m = data;
+								createMenu(m);
+
+								$("#tree").html(menuStr);
+
+								setMenu();
+								//重新渲染
+								layui.use('element', function() {
+									var element = layui.element;
+									element.render('nav');
+								});
+							});
+						}
+						//设置菜单选中状态
+						function setMenu() {
+							var arr;
+							var obj;
+							var strcookie = document.cookie;
+							//将多cookie切割为多个名/值对
+							var arrcookie = strcookie.split("; ");
+							//遍历cookie数组，处理每个cookie对
+							for(var i = 0; i < arrcookie.length; i++) {     
+								arr = arrcookie[i].split("=");
+								obj = document.getElementById(arr[0]);
+								if(obj != null) {
+									obj.className = unescape(arr[1]);
+								}
+							}
+
+							var selMenuId = getCookie('selMenuId');
+							var selMenuClass = getCookie('selMenuClass');
+							if(selMenuId != null && selMenuClass != null) {
+								obj = document.getElementById(selMenuId);
+								obj.className = unescape(selMenuClass);
+							}
+						}
+					</script>
+
+				</div>
+			</div>
+			<div class="layui-body">
+				<div class="layui-bodys">
+					<div style="padding-bottom: 10px;">
+						<button class="layui-btn BannerListAdd">添加广告组</button>
+						<a href="BannerRem.html" class="layui-btn">广告列表</a>
+					</div>
+
+					<table class="layui-hide" id="personal" lay-filter="personal"></table>
+
+					<script type="text/html" id="checkboxTpl">
+						<input type="checkbox" name="lock" value="{{d.product_id}}" title="下架" lay-filter="lockShop" {{ d.enable==0 ? 'checked' : '' }}>
+					</script>
+					<script type="text/html" id="colstoolbar">
+						<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+						<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+					</script>
+					<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+					<script>
+						layui.use('laydate', function() {
+							var laydate = layui.laydate;
+							//日期时间选择器
+							laydate.render({
+								elem: '#end_time',
+								type: 'time'
+							});
+						});
+						layui.config({
+							base: '../js/' //静态资源所在路径
+						}).extend({
+							setter: 'config' //配置模块
+						}).use(['setter', 'util', 'table', 'form', 'upload', 'laydate', 'common'], function() {
+							var setter = layui.setter;
+							var table = layui.table;
+							var util = layui.util; //工具集
+							var form = layui.form;
+							var upload = layui.upload;
+							var laydate = layui.laydate;
+							var common=layui.common;
+
+							var element = layui.element;
+							var id=common.getUrlParam('id');
+
+							//方法级渲染
+							table.render({
+								elem: '#personal',
+								headers: {
+									Authorization: setter.askToken()
+								},
+								url: setter.requestUrl + '/backstage/advertisement_groups',
+								cols: [
+									[{
+											field: 'id',
+											title: '广告ID',
+										}, {
+											field: 'ad_group_name',
+											title: '广告组名字',
+										}, {
+											field: 'start_carousel_time',
+											title: '开始时间',
+											templet: function(d) {
+												return util.toDateString(d.start_carousel_time, 'HH:mm:ss');
+
+											} //解析时间
+										}, {
+											field: 'end_carousel_time',
+											title: '结束时间',
+											templet: function(d) {
+												return util.toDateString(d.end_carousel_time, 'HH:mm:ss');
+											}
+										}, {
+											field: 'ad_count',
+											title: '广告数量'
+										}, {
+											field: 'is_enable',
+											title: '是否启用',
+											templet: function(d) {
+												return setter.dic_is_enable[d.is_enable]
+											}
+										}, {
+											field: 'details',
+											title: '详情',
+											templet: function(d) {
+												return '<a href="Banner.html?id=' + d.id + '">' + '查看'; //跳到不同ID页面内容，加载
+											}
+										}, {
+											title: '操作',
+											fixed: 'right',
+											width: 185,
+											align: 'center',
+											toolbar: '#colstoolbar'
+										}
+
+									]
+								],
+								limit:15,
+								limits:[15],
+								page: true,
+								request: {
+									limitName: 'size' //每页数据量的参数名，默认：limit
+								},
+								parseData: function(res) { //res 即为原始返回的数据
+									if(res.data) {
+										//返回有data 数据，就设置code 为0=请求数据成功
+										res.code = 0
+									}
+									return {
+										"code": res.code, //解析接口状态
+										"msg": res.message, //解析提示文本
+										"count": res.data.total, //解析数据长度
+										"data": res.data.advertisements //解析数据列表（记得改advertisements）
+									}
+								},
+
+							});
+							var tabIndex; //弹出层修改广告组信息
+							function openAdv(data) {
+								tabIndex = layer.open({
+									title: "修改广告组信息",
+									type: 1,
+									area: ['600px', '450px'],
+									content: ['<div style="padding:20px;">',
+										'<form  class="layui-form" lay-filter="advForm">',
+										'<input type="hidden" name="id">',
+										'<div class="layui-form-item">',
+										' <label class="layui-form-label">广告组标题：</label>',
+										' <div class="layui-input-block">',
+										' <input type="text" name="ad_group_name" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
+										'  </div>',
+										' </div>',
+										'<div class="layui-form-item">',
+										'	<label class="layui-form-label">开始时间:</label>',
+										'		<div class="layui-input-block">',
+										'			<input name="start_carousel_time" lay-verify="required" id="start_time" type="text" class="layui-input" >',
+										'		</div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										'	<label class="layui-form-label">结束时间:</label>',
+										'		<div class="layui-input-block">',
+										'			<input name="end_carousel_time" lay-verify="required" id="end_time" type="text" class="layui-input">',
+										'		</div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										'	<label class="layui-form-label">是否启用</label>',
+										'		<div class="layui-input-block">',
+										'			<input name="is_enable" type="radio"  value="1" title="启用" >',
+										'			<input name="is_enable" type="radio"  value="0" title="不启用">',
+										'		</div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
+										'	</div>', '</div>',
+										'</form>',
+										'</div>'
+									].join(''),
+									success: function(layero, index) {
+										//输入框绑定一个laydate实例
+										laydate.render({
+											elem: '#start_time', //指定元素
+											type: 'time',
+											format: 'HH:mm:ss'
+										});
+										laydate.render({
+											elem: '#end_time', //指定元素
+											type: 'time',
+											format: 'HH:mm:ss'
+										});
+										form.render(); //渲染单选框
+										data.start_carousel_time = util.toDateString(data.start_carousel_time, 'HH:mm:ss');
+										data.end_carousel_time = util.toDateString(data.end_carousel_time, 'HH:mm:ss');
+										data.is_enable = data.is_enable.toString(); //转换成整形字符串类型
+										form.val('advForm', data) //赋值表单
+										updateAdForm(); //修改广告表单adForm("reviseForm", data); //产品广告表单
+									}
+								});
+							}
+							//保存表单
+							function saveUpdateForm(url, parsm, successMsg, failureMsg) {
+								common.put(url, parsm, function(result) {
+									if(result.code == 202) {
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('personal');
+											layer.close(tabIndex);
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								});
+							}
+							//修改广告表单方法
+							function updateAdForm() {
+								//监听表单提交事件
+								form.on('submit(btn_save)', function(data) {
+									console.log(data)
+									var url = setter.requestUrl + "/backstage/advertisement_groups/advertisements/" + data.field.id;
+									var parsm = data.field
+									var successMsg = "成功";
+									var failureMsg = "失败";
+									var date = new Date(); //当前时间
+
+									var y = date.getFullYear() //年
+									var m = date.getMonth() + 1 //月
+									var d = date.getDate(); //日
+
+									parsm.start_carousel_time = Date.parse(y + '-' + m + '-' + d + ' ' + parsm.start_carousel_time);
+									parsm.end_carousel_time = Date.parse(y + '-' + m + '-' + d + ' ' + parsm.end_carousel_time);
+									console.log(url, JSON.stringify(parsm));
+									saveUpdateForm(url, parsm, successMsg, failureMsg);
+									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+								});
+
+							}
+							//表单  //修改广告组信息
+							function saveForm(formName, data) {
+								var tbData = data
+								form.val(formName, data); //赋值表单
+								//监听表单提交事件
+								form.on('submit(btn_save)', function(data) {
+									var url = setter.requestUrl + "/backstage/advertisement_groups/advertisements/" + tbData.id; ///advertisements/update/   /backstage/advertisements/
+									var parsm = data.field
+									var successMsg = "成功";
+									var failureMsg = "失败";
+									console.log(url, JSON.stringify(parsm));
+									saveForm(url, parsm, successMsg, failureMsg);
+									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+								});
+
+							}
+							
+							//修改广告组信息  
+							function saveForm(url, parsm, successMsg, failureMsg) {
+								common.put(url, parsm, function(result) {
+									if(result.code == 202) {
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('personal');
+											layer.close(tabIndex);
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								});
+							}
+
+							//监听行工具事件，删除广告
+							table.on('tool(personal)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+								var data = obj.data //获得当前行数据
+									,
+									layEvent = obj.event; //获得 lay-event 对应的值
+								if(layEvent === 'detail') {
+									layer.msg('查看操作');
+								} else if(layEvent === 'del') {
+									layer.confirm('真的删除广告组么', {
+										icon: 0
+									}, function(index) {
+										//obj.del(); //删除对应行（tr）的DOM结构
+										var url = setter.requestUrl + "/backstage/advertisement_groups/advertisements/" + data.id; // /advertisement_groups/advertisements
+										var successMsg = "成功";
+										var failureMsg = "失败";
+										console.log(url);
+										saveDelForm(url, successMsg, failureMsg);
+										//向服务端发送删除指令
+										layer.close(index);
+									});
+								} else if(layEvent === 'edit') {
+									openAdv(data)
+								}
+							});
+
+							//新增广告表单方法
+							function addAdForm() {
+								//监听表单提交事件
+								form.on('submit(btn_save)', function(data) {
+									var url = setter.requestUrl + "/backstage/advertisement_groups"; ///advertisement_groups/users/0
+									var parsm = data.field
+									var successMsg = "成功";
+									var failureMsg = "失败";
+									var date = new Date(); //当前时间
+
+									var y = date.getFullYear() //年
+									var m = date.getMonth() + 1 //月
+									var d = date.getDate(); //日
+
+									parsm.start_carousel_time = Date.parse(y + '-' + m + '-' + d + ' ' + parsm.start_carousel_time);
+									parsm.end_carousel_time = Date.parse(y + '-' + m + '-' + d + ' ' + parsm.end_carousel_time);
+									console.log(url, JSON.stringify(parsm));
+									saveAddForm(url, parsm, successMsg, failureMsg);
+									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+								});
+
+							}
+
+							//保存表单
+							function saveAddForm(url, parsm, successMsg, failureMsg) {
+								common.post(url, parsm, function(result) {
+									if(result.code == 201 || result.code == 202) { //新增成功 202 修改成功
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('personal');
+											layer.close(tabIndex); //保存成功关闭tab弹出层
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								});
+							}
+							//增加广告组
+							//弹出一个提示层
+							$('.BannerListAdd').on('click', function() {
+								tabIndex = layer.open({
+									type: 1,
+									area: ['500px', '350px'],
+									shadeClose: true, //点击遮罩关闭
+									content: ['<div style="padding:20px;">',
+										'<form  class="layui-form" lay-filter="addAdForm">',
+										'<div class="layui-form-item">',
+										' <label class="layui-form-label">广告组标题：</label>',
+										' <div class="layui-input-block">',
+										' <input type="text" name="ad_group_name" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
+										'  </div>',
+										' </div>',
+										'<div class="layui-form-item">',
+										'	<label class="layui-form-label">开始时间:</label>',
+										'		<div class="layui-input-block">',
+										'			<input name="start_carousel_time" lay-verify="required" id="start_time" type="text" class="layui-input" >',
+										'		</div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										'	<label class="layui-form-label">结束时间:</label>',
+										'		<div class="layui-input-block">',
+										'			<input name="end_carousel_time" lay-verify="required" id="end_time" type="text" class="layui-input">',
+										'		</div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										'	<label class="layui-form-label">是否启用</label>',
+										'		<div class="layui-input-block">',
+										'			<input name="is_enable"  type="radio" value="1" title="启用">',
+										'			<input name="is_enable" type="radio" value="0" title="不启用">',
+										'		</div>',
+										'</div>',
+										'<div class="layui-form-item">',
+										'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
+										'	</div>', '</div>',
+										'</form>',
+										'</div>'
+									].join(''),
+
+									success: function(layero, index) {
+										//输入框绑定一个laydate实例
+										laydate.render({
+											elem: '#start_time', //指定元素
+											type: 'time',
+											format: 'HH:mm:ss'
+										});
+										laydate.render({
+											elem: '#end_time', //指定元素
+											type: 'time',
+											format: 'HH:mm:ss'
+										});
+										form.render(); //渲染单选框
+										form.val('addAdForm', {
+											'is_enable': '1'
+										}) //赋值表单,新增时默认有效
+										addAdForm(); //新增广告表单
+									}
+								});
+
+							});
+
+							
+							//删除广告组
+							function saveDelForm(url,successMsg, failureMsg) {
+								common.del(url, null, function(result) {
+									if(result.code == 203) { //删除成功
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+											//重载表格
+											table.reload('personal');
+											layer.close(tabIndex); //保存成功关闭tab弹出层
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								});
+							}
+						}); //use
+					</script>
+				</div>
+			</div>
+			<div class="layui-footer">
+				<!-- 底部固定区域 -->
+				© 猿知识网址
+			</div>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>公司加入作者审核详情</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+		<link rel="stylesheet" type="text/css" href="../css/layui.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/layer/default/layer.css" />
+		<script type="text/javascript" src="../js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="../js/layui.js">
+		</script>
+		<script type="text/javascript" src="../js/lay/modules/layer.js"></script>
+		<script type="text/javascript" src="../js/url-config.js">		</script>
+		<style>
+			/*图片宽高*/
+			
+			img {
+				width: 160px;
+				height: 100px;
+			}
+		</style>
+
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header">
+				<div class="layui-logo">猿知识</div>
+				<!-- 头部区域（可配合layui已有的水平导航） -->
+
+			</div>
+
+			<div class="layui-side layui-bg-black">
+				<div class="layui-side-scroll">
+					<div id="tree" style=" width: 200px;">
+					</div>
+				<script>
+						loadMenuTree();
+
+						layui.use('element', function() {
+							var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+							var layer = layui.layer;
+							//监听导航点击
+							element.on('nav(demo)', function(elem) {
+								//记录节点Id
+								var id = elem.attr('id');
+								var mid = 'menu' + id;
+								//在cookie中查找响应的节点
+								var c = getCookie(mid);
+
+								//alert(obj.className);
+								//如果找不到对应cookie则增加,找到则删除
+								if(c == null) {
+									var obj = document.getElementById(mid);
+									var count = parseInt(obj.getAttribute('count'));
+									if(count > 0)
+										setCookie(mid, escape(obj.className));
+									else {
+										setCookie('selMenuId', escape(mid));
+										setCookie('selMenuClass', escape(obj.className));
+									}
+
+								} else {
+									deleteCookie(mid);
+								}
+
+							});
+						});
+
+						//加载菜单树
+						function loadMenuTree() {
+
+							var m;
+
+							var url = b_url + '/backstage/menus/tree'; ///backstage
+							$.get(url, function(data) {
+								m = data;
+								createMenu(m);
+
+								$("#tree").html(menuStr);
+
+								setMenu();
+								//重新渲染
+								layui.use('element', function() {
+									var element = layui.element;
+									element.render('nav');
+								});
+							});
+						}
+						//设置菜单选中状态
+						function setMenu() {
+							var arr;
+							var obj;
+							var strcookie = document.cookie;
+							//将多cookie切割为多个名/值对
+							var arrcookie = strcookie.split("; ");
+							//遍历cookie数组，处理每个cookie对
+							for(var i = 0; i < arrcookie.length; i++) {     
+								arr = arrcookie[i].split("=");
+								obj = document.getElementById(arr[0]);
+								if(obj != null) {
+									obj.className = unescape(arr[1]);
+								}
+							}
+
+							var selMenuId = getCookie('selMenuId');
+							var selMenuClass = getCookie('selMenuClass');
+							if(selMenuId != null && selMenuClass != null) {
+								obj = document.getElementById(selMenuId);
+								obj.className = unescape(selMenuClass);
+							}
+						}
+					</script>
+
+				</div>
+			</div>
+			<div class="layui-body">
+				<div class="layui-bodys">
+					<div class="Personal-Toexamine">
+						<a href="company.html"><i class="layui-icon">&#xe65a;</i>返回</a>
+						<h1>公司加入作者详情</h1>
+						<table class="layui-table" lay-skin="line">
+							<colgroup>
+								<col width="150">
+								<col width="2000">
+							</colgroup>
+							<tr>
+								<td>ID：</td>
+								<td id='user_id'></td>
+							</tr>
+							<tr>
+								<td>公司名称：</td>
+								<td id="auth_name"></td>
+							</tr>
+							<tr>
+								<td>擅长领域：</td>
+								<td id="adepts"></td>
+							</tr>
+							<tr>
+								<td>店铺ID：</td>
+								<td id="shop_id"></td>
+							</tr>
+							<tr>
+								<td>店铺名称：</td>
+								<td id="shop_name"></td>
+							</tr>
+							<tr>
+								<td>简介：</td>
+								<td id="shop_summary"></td>
+							</tr>
+							<tr>
+								<td>LOGO:</td>
+								<td id="shop_logo_image"></td>
+							</tr>
+							<tr>
+								<td>营业执照：</td>
+								<td id="auth_front_image"></td>
+							</tr>
+						</table>
+
+						<!--按钮容器  -->
+						<div class="layui-btn-container" id="btn_con"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-footer">
+				<!-- 底部固定区域 -->
+				© 猿知识网址
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			layui.config({
+				base: '../js/' //静态资源所在路径
+			}).extend({
+				setter: 'config' //配置模块
+			}).use(['setter',
+				'element', 'layer', 'form', 'common'
+			], function() {
+				var setter = layui.setter;
+				var layer = layui.layer; //弹层
+				var form = layui.form //
+				var common = layui.common;
+				var element = layui.element;
+				var id = common.getUrlParam('shop_id');
+
+				function auditRefused() {
+					//弹层js放到这里
+					layer.open({
+						type: 1,
+						area: ['700px', '400px'],
+						title: '审核不通过原因',
+						shadeClose: true, //点击遮罩关闭
+						content: '\<\div style="padding:20px;font-size:18px">\
+									<form class="layui-form" lay-filter="test1" >\
+								<div class="layui-form-item">\
+										 <div class="layui-input-block" style="float:left" required>\
+												<input type="checkbox" name="Reason[auth_front_image]" value="营业执照正面不合格" lay-skin="primary" />营业执照正面不合格\
+													<br>\
+													<input type="checkbox" name="Reason[auth_behind_image]" value="营业执照反面不合格" lay-skin="primary" />营业执照反面不合格\
+														 <br>\
+													<input type="checkbox" name="Reason[shop_logo_image]" value="LOGO不合格" lay-skin="primary"  />LOGO不合格\
+														<br>\
+													<input type="checkbox" name="Reason[shop_name]" value="店铺名不合格" lay-skin="primary" />店铺名不合格\
+														<br>\
+										</div>\
+												<br>\
+													<div class="layui-form-item layui-form-text">\
+														    <div class="layui-input-block">\
+														      <textarea name="Reason" placeholder="可以输入拒绝原因" class="layui-textarea" style="margin-top:100px;width:400px"></textarea>\
+														    </div>\
+													</div>\
+											</div>\
+													<div class="layui-form-item">\
+														<div class="layui-input-block">\
+															<button class="layui-btn layui-btn-lg" type="button" lay-submit lay-filter="formDemo" style="float:left">确定</button>\
+														</div>\
+													</div>\
+									</form>\
+									<\/div>',
+						success: function(layero, index) {
+							//监听提交
+							form.render(null, 'test1'); //更新 lay-filter="test1" 所在容器内的全部表单状态
+
+							form.on('submit(formDemo)', function(data) {
+								//审核状态 1是未审核，2是已通过，3是已拒绝
+								var url = setter.requestUrl + "/auth_state/" + id;
+								var failure_description = ""; //审核不通过理由
+								$.each(data.field, function(i, v) {
+									if(i == "Reason") {
+										failure_description += v
+									} else {
+										failure_description += v + ","
+									}
+								});
+								var parsm = {
+									auth_state_code: 3,
+									failure_description: failure_description,
+									user_id: setter.user_id(setter.tableName)
+								}
+								var successMsg = "拒绝该用户成为作者成功";
+								var failureMsg = "拒绝该用户成为作者失败";
+								saveAudit(url, parsm, successMsg, failureMsg);
+								return false;
+							}); //end form.on
+						} //end success
+					}); //end open
+				}
+				//保存审核状态
+				function saveAudit(url, parsm, successMsg, failureMsg) {
+					common.put(url, parsm, function(result) {
+						if(result.code == 202) {
+							layer.alert(successMsg, {
+								icon: 1
+							}, function(index) {
+								layer.close(index);
+							//	location.reload(); //刷新当前页面
+								window.location.href="../Toexamine/company.html";
+							})
+						} else {
+							layer.alert(failureMsg, {
+								icon: 2
+							}, function(index) {
+								layer.close(index);
+							})
+						}
+					});
+				}
+
+				if(id) { //有值的时候再请求
+					var url = setter.requestUrl + "/backstage/authors/audit/1";
+					common.get(url, '', function(result) {
+						console.log(result)
+						var object = {} //用户申请单信息
+						$.each(result.data.authors, function(i, v) {
+							if(v.shop_id == id) {
+								object = v;
+								return false; //结束遍历 
+							}
+						}) //审核状态
+						var btn_con = ['<button data-type="auditRefused" class="layui-btn layui-btn-danger">拒绝通过</button> ',
+							'<button data-type="auditThrough" class="layui-btn" >审核通过</button>',
+							'<button data-type="alreadyAudit" class="layui-btn layui-btn-disabled"   disabled="disabled">已通过</button> ', '<button data-type="alreadyAudit" class="layui-btn layui-btn-disabled"   disabled="disabled">审核未通过</button> '
+						]
+
+						var auth_state_code = object.auth_state_code; //如果是已通过
+						switch(auth_state_code) {
+							case 1:
+								$("#btn_con").append(btn_con[0]);
+								$("#btn_con").append(btn_con[1]);
+								break;
+							case 2:
+								$("#btn_con").append(btn_con[2]);
+								break;
+							case 3:
+								$("#btn_con").append(btn_con[3]);
+								break;
+						}
+
+						$('#btn_con .layui-btn').on('click', function() {
+							var type = $(this).data('type');
+							switch(type) {
+								case 'auditRefused': //拒绝通过
+									auditRefused(); //执行方法
+									break;
+								case 'auditThrough': //审核通过
+									//审核状态 1是未审核，2是已通过，3是已拒绝
+									var url = setter.requestUrl + "/backstage/auth_state/" + id;
+									var parsm = {
+										auth_state_code: 2,
+										failure_description: "",
+										user_id: setter.user_id(setter.tableName)
+									}
+									var successMsg = "审核成功";
+									var failureMsg = "";
+									console.log(url,parsm);
+									saveAudit(url, parsm, successMsg, failureMsg)
+									break;
+								case 'alreadyAudit': //已审核
+									break;
+							}
+						});
+
+						$("#user_id").text(object.user_id);
+						$("#auth_name").text(object.auth_name);
+						//$("#adepts").text(object.adepts);
+						$("#shop_id").text(object.shop_id);
+						$("#shop_name").text(object.shop_name);
+						$("#shop_summary").text(object.shop_summary);
+						//$("#shop_logo_image").text(object.shop_logo_image);
+						//$("#auth_front_image").text(object.auth_front_image);
+						var adepts = [];
+						$.each(object.adepts, function(i, v) {
+							$.each(v.child_tags, function(j, k) {
+								adepts.push(k.tag_name + ' ');
+							});
+						})
+						$("#adepts").html(adepts.join(''));
+
+						var logo_image = [];
+						logo_image.push('<img style="display: inline-block; max-width:500px" layer-src=' + object.shop_logo_image.original_file_url + ' src= ' + object.shop_logo_image.original_file_url + '>')
+						$("#shop_logo_image").html(logo_image.join(''));
+						layer.photos({
+							photos: '#shop_logo_image',
+							anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+						});
+						var logo_image = [];
+						logo_image.push('<img style="display: inline-block; max-width:700px " layer-src=' + object.auth_front_image.original_file_url + ' src= ' + object.auth_front_image.original_file_url + '>'),
+							logo_image.push('<img style="display: inline-block; max-width:700px " layer-src=' + object.auth_behind_image.original_file_url + ' src= ' + object.auth_behind_image.original_file_url + '>')
+						$("#auth_front_image").html(logo_image.join(''));
+						layer.photos({
+							photos: '#auth_front_image',
+							anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+						});
+					});
+				};
+			});
+		</script>
+
+	</body>
+
+</html>

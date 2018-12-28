@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>系统推送</title>
+		<link rel="stylesheet" type="text/css" href="../css/layui.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/style.css"/>
+		<script type="text/javascript" src="../js/jquery-3.1.1.min.js">	</script>
+		<script type="text/javascript" src="../js/layui.js">		</script>
+		<script type="text/javascript" src="../js/url-config.js">		</script>
+	</head>
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header">
+				<div class="layui-logo">logo</div>
+				<!-- 头部区域（可配合layui已有的水平导航） -->
+
+				<ul class="layui-nav layui-layout-right">
+					
+					<li class="layui-nav-item">
+						<a href="">退了</a>
+					</li>
+				</ul>
+			</div>
+
+			<div class="layui-side layui-bg-black">
+				<div class="layui-side-scroll">
+					<div id="tree" style=" width: 200px;">
+					</div>
+					<script>
+			loadMenuTree();
+
+			layui.use('element', function() {
+				var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+				var layer = layui.layer;
+				//监听导航点击
+				element.on('nav(demo)', function(elem) {
+					//记录节点Id
+					var id = elem.attr('id');
+					var mid = 'menu' + id;
+					//在cookie中查找响应的节点
+					var c = getCookie(mid);
+
+					//alert(obj.className);
+					//如果找不到对应cookie则增加,找到则删除
+					if(c == null) {
+						var obj = document.getElementById(mid);
+						var count = parseInt(obj.getAttribute('count'));
+						if(count > 0)
+							setCookie(mid, escape(obj.className));
+						else {
+							setCookie('selMenuId', escape(mid));
+							setCookie('selMenuClass', escape(obj.className));
+						}
+
+					} else {
+						deleteCookie(mid);
+					}
+
+				});
+			});
+
+			//加载菜单树
+			function loadMenuTree() {
+
+				var m;
+
+				var url = b_url + '/backstage/menus/tree'; ///backstage
+				$.get(url, function(data) {
+					m = data;
+					createMenu(m);
+
+					$("#tree").html(menuStr);
+
+					setMenu();
+				});
+			}
+			//设置菜单选中状态
+			function setMenu() {
+				var arr;
+				var obj;
+				var strcookie = document.cookie;
+				//将多cookie切割为多个名/值对
+				var arrcookie = strcookie.split("; ");
+				//遍历cookie数组，处理每个cookie对
+				for(var i = 0; i < arrcookie.length; i++) {     
+					arr = arrcookie[i].split("=");
+					obj = document.getElementById(arr[0]);
+					if(obj != null) {
+						obj.className = unescape(arr[1]);
+					}
+				}
+
+				var selMenuId = getCookie('selMenuId');
+				var selMenuClass = getCookie('selMenuClass');
+				if(selMenuId != null && selMenuClass != null) {
+					obj = document.getElementById(selMenuId);
+					obj.className = unescape(selMenuClass);
+				}
+			}
+		</script>
+
+				</div>
+			</div>
+
+			<div class="layui-body">
+				<div class="layui-bodys">
+					<div class="system">
+						<h1>系统推送</h1>
+						<hr />
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-footer">
+				<!-- 底部固定区域 -->
+				© 猿知识网址
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+			layui.use('element', function() {
+				var element = layui.element;
+
+			});
+		</script>
+	</body>
+	
+</html>

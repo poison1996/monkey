@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>产品分类</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+		<link rel="stylesheet" type="text/css" href="../css/layui.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/layer/default/layer.css" />
+		<script type="text/javascript" src="../js/jquery-3.1.1.min.js">
+		</script>
+		<script type="text/javascript" src="../js/jquery.ztree.all.js">
+		</script>
+		<script type="text/javascript" src="../js/layui.js">
+		</script>
+		<script type="text/javascript" src="../js/url-config.js">		</script>
+		<style>
+			.layui-card-body .layui-btn {
+				margin: 0 7px 10px 0;
+			}
+			
+			button .layui-tab-close {
+				margin-left: 8px;
+			}
+			
+			button .layui-tab-close:hover {
+				border-radius: 2px;
+				background-color: #FF5722;
+				color: #fff;
+			}
+		</style>
+		<!--<style type="text/css">
+			.ztree li a.level0 {
+				height: 45px;
+				line-height: 45px;
+				color: #fff;
+				color: rgba(255, 255, 255, .7)
+			}
+			/*当前选中样式*/
+			
+			.ztree li a.level0.cur {
+				background-color: #009688;
+				color: #fff;
+			}
+			
+			#treeDemo_3_a {
+				padding-left: 10px;
+			}
+			
+			#treeDemo_4,
+			#treeDemo_5_a {
+				padding-left: 20px;
+			}
+			
+			.level1,
+			#treeDemo_4_a,
+			#treeDemo_5_a {
+				color: #FFFFFF;
+				font-size: 14px;
+				line-height: 40px;
+			}
+			
+			.ztree li a.level0 span {
+				display: block;
+				color: white;
+				padding-top: 3px;
+				font-size: 12px;
+				font-weight: bold;
+				word-spacing: 2px;
+			}
+			
+			.ztree li a.level0 span.button {
+				float: right;
+				margin-left: 10px;
+				visibility: visible;
+				display: none;
+			}
+			
+			.ztree li span.button.switch.level0 {
+				display: none;
+			}
+		</style>-->
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header">
+				<div class="layui-logo">猿知识</div>
+				<!-- 头部区域（可配合layui已有的水平导航） -->
+
+			</div>
+
+			<div class="layui-side layui-bg-black">
+				<div class="layui-side-scroll">
+					<div id="tree" style=" width: 200px;">
+					</div>
+					<script>
+						loadMenuTree();
+
+						layui.use('element', function() {
+							var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+							var layer = layui.layer;
+							//监听导航点击
+							element.on('nav(demo)', function(elem) {
+								//记录节点Id
+								var id = elem.attr('id');
+								var mid = 'menu' + id;
+								//在cookie中查找响应的节点
+								var c = getCookie(mid);
+
+								//alert(obj.className);
+								//如果找不到对应cookie则增加,找到则删除
+								if(c == null) {
+									var obj = document.getElementById(mid);
+									var count = parseInt(obj.getAttribute('count'));
+									if(count > 0)
+										setCookie(mid, escape(obj.className));
+									else {
+										setCookie('selMenuId', escape(mid));
+										setCookie('selMenuClass', escape(obj.className));
+									}
+
+								} else {
+									deleteCookie(mid);
+								}
+
+							});
+						});
+
+						//加载菜单树
+						function loadMenuTree() {
+
+							var m;
+
+							var url = b_url + '/backstage/menus/tree'; ///backstage
+							$.get(url, function(data) {
+								m = data;
+								createMenu(m);
+
+								$("#tree").html(menuStr);
+
+								setMenu();
+								//重新渲染
+								layui.use('element', function() {
+									var element = layui.element;
+									element.render('nav');
+								});
+							});
+						}
+						//设置菜单选中状态
+						function setMenu() {
+							var arr;
+							var obj;
+							var strcookie = document.cookie;
+							//将多cookie切割为多个名/值对
+							var arrcookie = strcookie.split("; ");
+							//遍历cookie数组，处理每个cookie对
+							for(var i = 0; i < arrcookie.length; i++) {     
+								arr = arrcookie[i].split("=");
+								obj = document.getElementById(arr[0]);
+								if(obj != null) {
+									obj.className = unescape(arr[1]);
+								}
+							}
+
+							var selMenuId = getCookie('selMenuId');
+							var selMenuClass = getCookie('selMenuClass');
+							if(selMenuId != null && selMenuClass != null) {
+								obj = document.getElementById(selMenuId);
+								obj.className = unescape(selMenuClass);
+							}
+						}
+					</script>
+
+				</div>
+			</div>
+			<div class="layui-body">
+				<div class="layui-bodys">
+					<h1 style="">产品分类</h1>
+					<div style="padding: 20px; background-color: #F2F2F2;">
+						<div class="layui-row layui-col-space15">
+
+							<div class="layui-card">
+								<div class="layui-card-header">一级分类</div>
+								<div class="layui-card-body tagType">
+								</div>
+							</div>
+
+							<div class="layui-card">
+								<div class="layui-card-header">二级分类</div>
+								<div class="layui-card-body">
+									<div class="layui-collapse tag">
+
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<script>
+					layui.config({
+						base: '../js/' //静态资源所在路径
+					}).extend({
+						setter: 'config' //配置模块
+					}).use(['setter', 'util', 'element', 'table', 'form', 'common'], function() {
+						var setter = layui.setter;
+						var table = layui.table;
+						var util = layui.util; //工具集
+						var layer = layui.layer;
+						var element = layui.element;
+						var common = layui.common;
+
+						//一级分类标签模板
+						var tagTypeTemplate = function(tag_type_name, tag_type_code) {
+							return '<button class="layui-btn" data-tag_type_code="' + tag_type_code + '" data-type="editType" style="background-color:#5FB878">' + tag_type_name + '<i data-type="delTagType" class="layui-icon layui-icon-close layui-tab-close"></i></button>'
+						};
+						//一级分类添加按钮元素
+						var tagTypeAddButtom = '<button class="layui-btn" data-type="editType"><i class="layui-icon layui-icon-add-1"></i></button>';
+
+						//二级分类标签模板
+						var tagTemplate = function(tag_type_code, tag_name, tag_code) {
+							return '<button class="layui-btn  layui-btn-sm layui-btn-primary" data-tag_type_code="' + tag_type_code + '" data-tag_code="' + tag_code + '" data-type="edit">' + tag_name + '<i data-type="delTag" class="layui-icon layui-icon-close layui-tab-close"></i></button>'
+						};
+						//二级分类添加按钮元素
+						var tagAddButtom = function(tag_type_code) {
+							return '<button class="layui-btn layui-btn-sm  layui-btn-primary" data-tag_type_code="' + tag_type_code + '" data-type="edit"><i class="layui-icon layui-icon-add-1"></i></span></button>';
+						}
+						//获取二级分类折叠面板layui-colla-item元素
+						var tagElem = function(tag_type_name, tagButtom) {
+							return '<div class="layui-colla-item"><h2 class="layui-colla-title">' + tag_type_name + '</h2><div class="layui-colla-content layui-show">' + tagButtom + ' </div></div></div>';
+						}
+
+						var $ = layui.$,
+							active = {
+								editType: function() { //一级分类
+									var tag_type_code = $(this).data('tag_type_code');
+									var tag_type_name = $(this).text();
+									var buttonElem = $(this); //当前按钮
+									layer.prompt({
+										title: '一级分类',
+										formType: 0,
+										value: tag_type_name
+									}, function(value, index,
+										elem) {
+										//判断是否有值
+										if(tag_type_code) { //修改
+											buttonElem.text(value);
+											var url = setter.requestUrl + "/backstage/tag_types/" + tag_type_code;
+											var parsm = {
+												"tag_type_name": value
+											}
+											var successMsg = "成功";
+											var failureMsg = "失败";
+											saveTag(url, parsm, successMsg, failureMsg)
+										} else { //新增
+											buttonElem.text(value);
+											var url = setter.requestUrl + "/backstage/tag_types";
+											var parsm = {
+												"tag_type_name": value
+											}
+											var successMsg = "成功";
+											var failureMsg = "失败";
+											saveNewTag(url, parsm, successMsg, failureMsg)
+											//buttonElem.before(tagTypeTemplate(value, ''));
+											//$(".tag").append(tagElem(value, tagAddButtom));
+											//element.render('collapse');
+										}
+										layer.close(index);
+									});
+								},
+								edit: function() { //二级分类
+									var tag_code = $(this).data('tag_code');
+									var tag_type_code = $(this).data('tag_type_code');
+									var tag_name = $(this).text();
+									var buttonElem = $(this); //当前按钮
+									layer.prompt({
+										title: '二级分类',
+										formType: 0,
+										value: tag_name
+									}, function(value, index,
+										elem) {
+										//判断是否有值
+										if(tag_code) { //修改
+											buttonElem.text(value);
+											var url = setter.requestUrl + '/backstage/tags/' + tag_code;
+											var parsm = {
+												"tag": {
+													"tag_name": value,
+													"tag_type_code": tag_type_code
+												}
+											}
+											var successMsg = "成功";
+											var failureMsg = "失败";
+											saveTag(url, parsm, successMsg, failureMsg)
+										} else { //新增
+											var url = setter.requestUrl + "/backstage/tags";
+											var parsm = {
+												"tag": {
+													"tag_name": value,
+													"tag_type_code": tag_type_code
+												}
+											}
+											var successMsg = "成功";
+											var failureMsg = "失败";
+											saveNewTag(url, parsm, successMsg, failureMsg)
+											//buttonElem.before(tagTemplate(value, ''));
+										}
+										layer.close(index);
+									});
+								}
+							};
+						var $ = layui.$,
+							delTags = {
+								delTagType: function() { //删除一级分类
+									var tag_type_code = $(this).parent().data('tag_type_code');
+									var url = setter.requestUrl + "/backstage/tag_types/" + tag_type_code;
+									var successMsg = "成功";
+									var failureMsg = "失败";
+									console.log(url)
+									delTag(url, successMsg, failureMsg)
+								},
+								delTag: function() { //删除子标签
+									var tag_code = $(this).parent().data('tag_code');
+									var url = setter.requestUrl + "/backstage/tags/" + tag_code;
+									var successMsg = "成功";
+									var failureMsg = "失败";
+									console.log(url)
+									delTag(url, successMsg, failureMsg)
+								}
+							};
+						//事件委托
+						$('.tagType,.tag').on('click', '.layui-btn,.layui-tab-close', function() {
+							var type = $(this).data('type');
+							if($(this)[0].tagName == 'I') {
+								delTags[type] ? delTags[type].call(this) : '';
+								return false;
+							}
+							active[type] ? active[type].call(this) : '';
+						});
+
+						//加载一级分类元素
+						function loadTypeElem(data) {
+							var buttonElems = []
+							var colla = [];
+							$.each(data.data.tags, function(i, v) {
+								buttonElems.push(tagTypeTemplate(v.tag_type_name, v.tag_type_code));
+								colla.push(tagElem(v.tag_type_name, loadElem(v)));
+							});
+							buttonElems.push(tagTypeAddButtom);
+							$(".tagType").html(buttonElems.join(''));
+							$(".tag").html(colla.join(''));
+							element.render('collapse');
+						}
+
+						//加载一级分类的子元素
+						function loadElem(data) {
+							var buttonElems = []
+							$.each(data.child_tags, function(i, v) {
+								buttonElems.push(tagTemplate(data.tag_type_code, v.tag_name, v.tag_code));
+								loadElem(v)
+							});
+							buttonElems.push(tagAddButtom(data.tag_type_code));
+							return buttonElems.join('');
+						}
+						//获取标签数据
+						function getTagData() {
+							var url = setter.requestUrl + "/public/tags"; ///tags
+							$.ajax({
+								headers: {
+									Authorization: setter.askToken()
+								},
+
+								url: url,
+								type: "GET",
+								dataType: "JSON",
+								contentType: "application/json",
+								success: function(data) {
+									loadTypeElem(data) //执行
+								} //end success
+							}); //end ajax
+						}
+						getTagData() //执行方法
+
+						//修改一级标签
+						function saveTag(url, parsm, successMsg, failureMsg) {
+							common.put(url, parsm, function(result) {
+								if(result.code == 202) {
+									layer.alert(successMsg, {
+										icon: 1
+									}, function(index) {
+										layer.close(index);
+										//重载表格
+										table.reload('personal');
+										layer.close(tabIndex);
+									})
+								} else {
+									layer.alert(failureMsg, {
+										icon: 2
+									}, function(index) {
+										layer.close(index);
+									})
+								}
+							});
+						}
+
+						//删除一级标签
+						function delTag(url, successMsg, failureMsg) {
+							common.del(url, null, function(result) {
+								if(result.code == 203) { //删除成功
+									layer.alert(successMsg, {
+										icon: 1
+									}, function(index) {
+										layer.close(index);
+										//重载表格
+										location.reload(); //刷新当前页面
+										layer.close(tabIndex); //保存成功关闭tab弹出层
+									})
+								} else {
+									layer.alert(failureMsg, {
+										icon: 2
+									}, function(index) {
+										layer.close(index);
+									})
+								}
+							});
+						}
+
+						//新增一级标签
+						function saveNewTag(url, parsm, successMsg, failureMsg) {
+							common.post(url, parsm, function(result) {
+								if(result.code == 201 || result.code == 202) { //新增成功 202 修改成功
+									layer.alert(successMsg, {
+										icon: 1
+									}, function(index) {
+										layer.close(index);
+
+										location.reload(); //刷新当前页面
+										layer.close(tabIndex); //保存成功关闭tab弹出层
+									})
+								} else {
+									layer.alert(failureMsg, {
+										icon: 2
+									}, function(index) {
+										layer.close(index);
+									})
+								}
+							});
+						}
+
+					});
+				</script>
+				<SCRIPT type="text/javascript">
+					<!--
+					var curMenu = null,
+						zTree_Menu = null;
+					var setting = {
+						view: {
+							showLine: true,
+							selectedMulti: false,
+							dblClickExpand: false
+						},
+						data: {
+							simpleData: {
+								enable: true
+							}
+						},
+						callback: {
+							onNodeCreated: this.onNodeCreated,
+							beforeClick: this.beforeClick,
+							onClick: this.onClick
+						}
+					};
+
+					var zNodes = [{
+						name: "首页",
+						//url: "../index.html",
+						open: true //默认打开
+					},
+					{
+						name: "工作台",
+						children: [{
+								name: "作者审核",
+								children: [{
+										name: "个人审核"
+										//,url: "../Toexamine/personal.html"
+									},
+									{
+										name: "公司审核"
+										//,url: "../Toexamine/company.html"
+									}
+								]
+							},
+							{
+								name: "需求产品审核",
+							}, {
+								name: "知识产品审核"
+							}
+
+						]
+					},{
+						name:"资源管理",
+						children:[{
+							name:"定制需求",
+						},
+						{
+							name:"知识产品",
+						},{
+							name:"轮播广告"
+						}
+						]
+					}
+					
+					
+					
+					
+					];
+						
+						
+					function beforeClick(treeId, node) {
+						if(node.isParent) {
+							if(node.level === 0) {
+								var pNode = curMenu;
+								while(pNode && pNode.level !== 0) {
+									pNode = pNode.getParentNode();
+								}
+								if(pNode !== node) {
+									var a = $("#" + pNode.tId + "_a");
+									a.removeClass("cur");
+									zTree_Menu.expandNode(pNode, false);
+								}
+								a = $("#" + node.tId + "_a");
+								a.addClass("cur");
+
+								var isOpen = false;
+								for(var i = 0, l = node.children.length; i < l; i++) {
+									if(node.children[i].open) {
+										isOpen = true;
+										break;
+									}
+								}
+								if(isOpen) {
+									zTree_Menu.expandNode(node, true);
+									curMenu = node;
+								} else {
+									zTree_Menu.expandNode(node.children[0].isParent ? node.children[0] : node, true);
+									curMenu = node.children[0];
+								}
+							} else {
+								zTree_Menu.expandNode(node);
+							}
+						}
+						return !node.isParent;
+					}
+
+					function onClick(e, treeId, node) {
+						//	alert("Do what you want to do!");
+					}
+
+					$(document).ready(function() {
+						$.fn.zTree.init($("#treeDemo"), setting, zNodes);
+						zTree_Menu = $.fn.zTree.getZTreeObj("treeDemo");
+						curMenu = zTree_Menu.getNodes()[0];
+						zTree_Menu.selectNode(curMenu);
+						var a = $("#" + zTree_Menu.getNodes()[0].tId + "_a");
+						a.addClass("cur");
+					});
+					//-->
+				</SCRIPT>
+			</div>
+		</div>
+		<div class="layui-footer">
+			<!-- 底部固定区域 -->
+			© 猿知识网址
+		</div>
+
+	</body>
+
+</html>

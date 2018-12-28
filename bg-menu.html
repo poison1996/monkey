@@ -1,0 +1,350 @@
+﻿<!DOCTYPE html>
+<HTML>
+	<HEAD>
+		<TITLE> 菜单后台管理 </TITLE>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css" href="zTree_v3/css/zTreeStyle/zTreeStyle.css"/>
+		<link rel="stylesheet" type="text/css" href="css/layui.css" />
+		<link rel="stylesheet" type="text/css" href="css/modules/layer/default/layer.css"/>
+		<script type="text/javascript" src="js/jquery-3.1.1.min.js">		</script>
+		<script type="text/javascript" src="zTree_v3/js/jquery.ztree.all.js">		</script>	
+		<script type="text/javascript" src="js/layui.js">		</script>
+		<script type="text/javascript"src="js/url-config.js">		</script>
+
+		<SCRIPT LANGUAGE="JavaScript">
+			var zTreeObj;
+			// zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+			var setting = {
+
+				callback: {
+
+					beforeRemove: beforRemove,
+					onRemove: onRemove,
+					onClick:showSelectNode
+				},
+
+				edit: {
+					enable: true,
+					showRemoveBtn: true,
+					showRenameBtn: false,
+					removeTitle: "remove"
+				},
+				
+				data: {
+					 keep:
+					 {
+						parent:true
+					 }
+				 }
+
+			};
+			// zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
+			var zNodes;
+
+			var myNodes = [
+				{
+					name: "一级菜单1",
+					children: [{
+						name: "test1_1"
+					}, {
+						name: "test1_2"
+					}]
+				},
+				{
+					name: "一级菜单2",
+					children: [{
+						name: "test2_1"
+					}, {
+						name: "test2_2"
+					}]
+				}
+			];
+
+			$(document).ready(function() {
+
+				// zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, myNodes);
+				
+
+				loadMenu();
+			});
+
+			function beforRemove(treeId,treeNode) {
+				
+				if(treeNode.isParent && treeNode.children.length>0)	
+				{
+					alert("不能删除有子节点的父节点，请先删除子节点！");
+					return false ;
+				}
+				
+				return confirm("你确定要删除名称为"+treeNode.name+","+"id为"+treeNode.menuId+"的节点吗？");
+			}
+				
+			function onRemove(e,treeId,treeNode) 
+			{
+
+				try{
+					$.ajax({
+						type: "DELETE",
+						url: b_url+"/backstage/menus/"+treeNode.menuId,
+						//data: JSON.stringify(node),
+						dataType: "json",
+						contentType:"application/json;charset=utf-8",
+						success: function(data) {}
+					});
+				}
+				catch(err)
+				{
+					alert(err.message);
+				}				
+
+			}
+			
+			//新增根节点
+			function newRootNode()
+			{
+			
+				//获取所有的根节点
+				var nodes = zTreeObj.getNodes();
+				
+				var node = {
+					"menuId":0,
+					"appCode":1,
+					"menuCode":$('#menuCode').val(),
+					"menuName":$('#menuName').val(),
+					"menuRank":1,
+					"parentId":0,
+					"menuUrl":$('#menuUrl').val(),
+					"isEnable":1,
+					"idx":nodes.length+1
+				}
+				
+				
+				
+								
+				try{
+					$.ajax({
+						type: "POST",
+						url: b_url+"/backstage/menus",
+						data: JSON.stringify(node),
+						dataType: "json",
+						contentType:"application/json;charset=utf-8",
+						success: function(data) {
+							var mid = data ;
+							node.menuId = mid ;
+							var newNodes=
+							[
+								{
+									"menuId":mid,
+									"appCode":1,
+									"menuCode":$('#menuCode').val(),
+									"name":$('#menuName').val(),
+									"menuRank":1,
+									"parentId":-1,
+									"menuUrl":$('#menuUrl').val(),
+									"enable":true,
+									"idx":nodes.length+1,
+									"children":[]
+								}
+							]
+							
+							zTreeObj.addNodes(null,newNodes) ;
+							
+						}
+					});
+				}
+				catch(err)
+				{
+					alert(err.message);
+				}
+			}
+			
+			//新增子节点
+			function newChildNode() {
+				var nodes = zTreeObj.getSelectedNodes();
+				//如果选中节点,则以选中节点为父亲添加子节点
+				if(nodes.length<1)
+				{
+					alert('请选择一个父亲节点')
+					return ;
+				}
+
+				var node = {
+					"menuId":0,
+					"appCode":1,
+					"menuCode":$('#menuCode').val(),
+					"menuName":$('#menuName').val(),
+					"menuRank":nodes[0].menuRank+1,
+					"parentId":nodes[0].menuId,
+					"menuUrl":$('#menuUrl').val(),
+					"isEnable":(nodes[0].enable?1:0),
+					"idx":nodes[0].children.length+1
+				}
+				
+				try{
+					$.ajax({
+						type: "POST",
+						url: b_url+"/backstage/menus",
+						data: JSON.stringify(node),
+						dataType: "json",
+						contentType:"application/json;charset=utf-8",
+						success: function(data) {
+							var mid = data ;
+							node.menuId = mid ;
+							var newNodes=
+							[
+								{
+									"menuId":mid,
+									"appCode":1,
+									"menuCode":$('#menuCode').val(),
+									"name":$('#menuName').val(),
+									"menuRank":nodes[0].menuRank+1,
+									"parentId":nodes[0].menuId,
+									"menuUrl":$('#menuUrl').val(),
+									"idx":1,
+									"enable":nodes[0].enable,
+									"children":[]
+								}
+							]
+							
+							zTreeObj.addNodes(nodes[0],newNodes) ;
+						}
+					});
+				}
+				catch(err)
+				{
+					alert(err.message);
+				}
+				
+			}
+			//删除选中节点
+			function deleteNode() {
+
+			}
+			//修改选中的节点
+			function updateNode() {
+			var nodes = zTreeObj.getSelectedNodes();
+			
+			if(nodes.length>0)
+			{
+				var node = {
+					"menuId":nodes[0].menuId,
+					"menuCode":$('#menuCode').val(),
+					"menuName":$('#menuName').val(),
+					"menuUrl":$('#menuUrl').val()
+				}
+				
+				try{
+					$.ajax({
+						type: "PUT",
+						url: b_url+"/backstage/menus/"+nodes[0].menuId,
+						data: JSON.stringify(node),
+						dataType: "json",
+						contentType:"application/json;charset=utf-8",
+						success: function(data) {
+							nodes[0].name = $('#menuName').val();
+							nodes[0].menuCode = $('#menuCode').val();
+							nodes[0].menuUrl = $('#menuUrl').val();
+							zTreeObj.updateNode(nodes[0]);
+							alert('保存成功！');
+						}
+					});
+				}
+				catch(err)
+				{
+					alert(err.message);
+				}
+				
+			}
+
+
+			}
+			//显示选中的节点
+			function showSelectNode()
+			{
+				var nodes = zTreeObj.getSelectedNodes();
+				if(nodes.length>0)
+				{
+					$('#menuName').val(nodes[0].name);
+					//$('#menuId').val(nodes[0].menuId);
+					$('#menuCode').val(nodes[0].menuCode);
+					$('#menuUrl').val(nodes[0].menuUrl);
+					//$('#Idx').val(nodes[0].idx);
+					//alert(JSON.stringify(nodes[0]));
+				}
+				else 
+				{
+					$('#menuName').val("");
+					//$('#menuId').val("");
+					$('#menuCode').val("");
+					$('#menuUrl').val("");
+					//$('#Idx').val("");
+				}
+				
+			}
+
+			//加载客户选项
+			function loadMenu() {
+				var url = b_url+'/backstage/menus/tree';
+				//var url = '/menus';
+				$.get(url, function(data) {
+					zNodes = data;
+				//	console.log(data)
+					zTreeObj = $.fn.zTree.init($("#menuTree"), setting, zNodes);
+				});
+			}
+		</SCRIPT>
+	</HEAD>
+	<BODY>
+		<div id="leftTree" style="width: 200px; float: left; height: 100% ;">
+			<div style="height: 10px;">
+			</div>
+
+			<div style="background-color: aliceblue;width: 200px;height: 500px; overflow:auto">
+				<div >
+					<ul id="menuTree" class="ztree"></ul>
+				</div>
+			</div>
+		</div>
+		
+		<div id="rightContent" style="width: 400px ; height: 600px; float: left;">
+			<style type="text/css">
+			.layui-input{width: 500px;}	
+			</style>
+			<form class="layui-form" action="" style="width: 500px;">
+				<div style="height: 40px;"></div>
+					<div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label">菜单名称</label>
+							<div class="layui-input-block">
+								<input id="menuName" type="text" name="title"  required lay-verify="required" lay-verify="title" autocomplete="off" class="layui-input">
+							</div>
+						</div>
+					</div>
+					
+					<div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label">菜单编码</label>
+							<div class="layui-input-block">
+								<input id="menuCode" type="text" name="title"  required lay-verify="required"  lay-verify="title" autocomplete="off" class="layui-input">
+							</div>
+						</div>
+					</div>
+					
+					<div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label">链接地址</label>
+							<div class="layui-input-block">
+								<input id="menuUrl" type="text"  name="title"  required lay-verify="required"  lay-verify="title" autocomplete="off" class="layui-input">
+							</div>
+						</div>
+					</div>
+			</form>
+			<div class="layui-btn-container" style="text-align: center;">
+				<button id="btn_save" class="layui-btn layui-btn-sm" onclick="newRootNode()">新增根节点</button>
+				<button id="btn_save" class="layui-btn layui-btn-sm" onclick="newChildNode()">新增子节点</button>
+				<button id="btn_save" class="layui-btn layui-btn-sm" onclick="updateNode()">保存</button>
+			</div>
+		</div>
+		
+	</BODY>
+</HTML>

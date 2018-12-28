@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>修改协议</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+		<link rel="stylesheet" type="text/css" href="../css/layui.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/layer/default/layer.css" />
+		<link rel="stylesheet" type="text/css" href="../css/modules/laydate/default/laydate.css" />
+		<script type="text/javascript" src="../js/jquery-3.1.1.min.js">
+		</script>
+		<script type="text/javascript" src="../js/layui.js">
+		</script>
+		<script type="text/javascript" src="../js/cos-js-sdk-v5.js">
+		</script>
+		<script type="text/javascript" src="../js/lay/modules/laydate.js">
+		</script>
+		<script type="text/javascript" src="../js/lay/modules/layer.js">
+		</script>
+		<script type="text/javascript" src="../js/url-config.js">		</script>
+		<style type="text/css">
+			.layui-input-block {
+				margin-left: 130px;
+				min-height: 36px;
+			}
+		</style>
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header">
+				<div class="layui-logo">猿知识</div>
+				<!-- 头部区域（可配合layui已有的水平导航） -->
+
+			</div>
+
+		<div class="layui-side layui-bg-black">
+				<div class="layui-side-scroll">
+					<div id="tree" style=" width: 200px;">
+					</div>
+				<script>
+						loadMenuTree();
+
+						layui.use('element', function() {
+							var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+							var layer = layui.layer;
+							//监听导航点击
+							element.on('nav(demo)', function(elem) {
+								//记录节点Id
+								var id = elem.attr('id');
+								var mid = 'menu' + id;
+								//在cookie中查找响应的节点
+								var c = getCookie(mid);
+
+								//alert(obj.className);
+								//如果找不到对应cookie则增加,找到则删除
+								if(c == null) {
+									var obj = document.getElementById(mid);
+									var count = parseInt(obj.getAttribute('count'));
+									if(count > 0)
+										setCookie(mid, escape(obj.className));
+									else {
+										setCookie('selMenuId', escape(mid));
+										setCookie('selMenuClass', escape(obj.className));
+									}
+
+								} else {
+									deleteCookie(mid);
+								}
+
+							});
+						});
+
+						//加载菜单树
+						function loadMenuTree() {
+
+							var m;
+
+							var url = b_url + '/backstage/menus/tree'; ///backstage
+							$.get(url, function(data) {
+								m = data;
+								createMenu(m);
+
+								$("#tree").html(menuStr);
+
+								setMenu();
+								//重新渲染
+								layui.use('element', function() {
+									var element = layui.element;
+									element.render('nav');
+								});
+							});
+						}
+						//设置菜单选中状态
+						function setMenu() {
+							var arr;
+							var obj;
+							var strcookie = document.cookie;
+							//将多cookie切割为多个名/值对
+							var arrcookie = strcookie.split("; ");
+							//遍历cookie数组，处理每个cookie对
+							for(var i = 0; i < arrcookie.length; i++) {     
+								arr = arrcookie[i].split("=");
+								obj = document.getElementById(arr[0]);
+								if(obj != null) {
+									obj.className = unescape(arr[1]);
+								}
+							}
+
+							var selMenuId = getCookie('selMenuId');
+							var selMenuClass = getCookie('selMenuClass');
+							if(selMenuId != null && selMenuClass != null) {
+								obj = document.getElementById(selMenuId);
+								obj.className = unescape(selMenuClass);
+							}
+						}
+					</script>
+
+				</div>
+			</div>
+			<div class="layui-body">
+				<div class="layui-bodys">
+					<a href="Ageree.html"><i class="layui-icon">&#xe65a;</i>返回</a>
+
+					<form action="" class="layui-form" style="margin: 30px;" lay-filter="saveAddForm">
+						<h1 style="text-align: center;margin-bottom: 20px;">修改协议</h1>
+						<div class="layui-form-item">
+							<input type="text" name="title" id="title" lay-verify="title" required autocomplete="off" placeholder="请输入协议标题" class="layui-input">
+						</div>
+						<div class="layui-form-item">
+							<textarea id="content" name="content" lay-verify="content" required></textarea>
+						</div>
+						<div class="layui-form-item">
+							<input type="hidden" name="type_code" id="type_code" />
+							<input type="text" name="version" id="version" value="" required placeholder="请输入版本号" class="layui-input" style="width: 200px; float: left;" />
+						</div>
+						<h1 style="text-align: center;"><input class="layui-btn" lay-submit="" lay-filter="btn_save" value="确认修改"   id="btn_save"/></h1>
+					</form>
+
+					<!--协议-->
+					<script>
+						layui.config({
+						base: '../js/' //静态资源所在路径
+						}).extend({
+						setter: 'config' //配置模块
+						}).use(['setter', 'util', 'table', 'form', 'upload', 'laydate', 'layedit', 'common'], function() {
+							var setter = layui.setter;
+							var table = layui.table;
+							var util = layui.util; //工具集
+							var form = layui.form;
+							var upload = layui.upload;
+							var laydate = layui.laydate;
+							var tableSelect = layui.tableSelect;
+							var layedit = layui.layedit;
+							var common = layui.common;
+							var elemen = layui.elemen;
+							var id = common.getUrlParam('id'); //获取知识平台协议的id
+							var editIndex = layedit.build('content', {
+								height: 450,
+								tool: [
+									'strong' //加粗
+									, 'italic' //斜体
+									, 'underline' //下划线
+									, 'del' //删除线
+
+									, '|' //分割线
+
+									, 'left' //左对齐
+									, 'center' //居中对齐
+									, 'right' //右对齐
+								]
+							});
+
+							//根据不同ID进来不同协议
+							if(id) { //有值的时候再请求
+								var url = setter.requestUrl + "/backstage/agreements/" + id;
+								common.get(url, null, function(result) {
+									var object = result.data;
+									$("#title").val(object.title);
+									/**
+									 * 设置编辑器内容
+									 * @param {[type]} index   编辑器索引
+									 * @param {[type]} content 要设置的内容
+									 * @param {[type]} flag    是否追加模式
+									 */
+									layedit.setContent(editIndex, object.content);
+									$("#version").val(object.version);
+								});
+							};
+
+							//自定义验证规则
+							form.verify({
+								content: function(value) {
+									layedit.sync(editIndex);
+									if(!$.trim(layedit.getContent(editIndex))) {
+										return '内容不能为空';
+									}
+								}
+							});
+
+							//修改协议
+							//监听表单提交事件
+							form.on('submit(btn_save)', function(data) {
+								var url = setter.requestUrl + "/backstage/agreements/" + id;
+								var parsm = data.field
+								parsm.user_id = setter.user_id(setter.tableName);//！！！！！！！！！！
+								var successMsg = "成功";
+								var failureMsg = "失败";
+								console.log(url, JSON.stringify(parsm));
+								saveAddForm(url, parsm, successMsg, failureMsg);
+								return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+							});
+
+							//保存表单
+							function saveAddForm(url, parsm, successMsg, failureMsg) {
+								common.put(url, parsm, function(result) {
+									if(result.code == 202) {
+										layer.alert(successMsg, {
+											icon: 1
+										}, function(index) {
+											layer.close(index);
+										})
+									} else {
+										layer.alert(failureMsg, {
+											icon: 2
+										}, function(index) {
+											layer.close(index);
+										})
+									}
+								})
+								
+						}
+
+						}); //use
+					</script>
+
+				</div>
+			</div>
+			<div class="layui-footer">
+				<!-- 底部固定区域 -->
+				© 猿知识网址
+			</div>
+		</div>
+	</body>
+
+</html>
