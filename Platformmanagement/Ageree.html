@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -104,7 +105,7 @@
 							//将多cookie切割为多个名/值对
 							var arrcookie = strcookie.split("; ");
 							//遍历cookie数组，处理每个cookie对
-							for(var i = 0; i < arrcookie.length; i++) {     
+							for(var i = 0; i < arrcookie.length; i++) {     
 								arr = arrcookie[i].split("=");
 								obj = document.getElementById(arr[0]);
 								if(obj != null) {
@@ -271,10 +272,11 @@
 											layer.alert(successMsg, {
 												icon: 1
 											}, function(index) {
-											//	layer.close(index);
+												layer.close(index);
 												//重载表格
-												table.reload('index');
-											//	layer.close(tabIndex);
+												table.reload('personal');
+												layer.close(tabIndex);
+												
 												
 											})
 										} else {
@@ -282,7 +284,6 @@
 												icon: 2
 											}, function(index) {
 												layer.close(index);
-												layer.close(tabIndex);
 											})
 										}
 									});
@@ -333,9 +334,10 @@
 											icon: 1
 										}, function(index) {
 											layer.close(index);
+											layer.close(tabIndex);
 											//重载表格
 											table.reload('personal');
-											layer.close(tabIndex);
+											
 											
 										})
 									} else {
@@ -343,7 +345,6 @@
 											icon: 2
 										}, function(index) {
 											layer.close(index);
-											layer.close(tabIndex);
 										})
 									}
 								});
@@ -389,7 +390,7 @@
 									var failureMsg = "失败";
 
 									console.log(url, JSON.stringify(parsm));
-									//saveTypeAddForm(url, parsm, successMsg, failureMsg);
+									saveTypeAddForm(url, parsm, successMsg, failureMsg);
 									return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
 								});
 
@@ -432,7 +433,7 @@
 										'<div class="layui-form-item">',
 										' <label class="layui-form-label">类型编码：</label>',
 										' <div class="layui-input-block">',
-										' <input type="text" name="type_code" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
+										' <input type="text" name="type_code"  lay-verify="number"  placeholder="请输入数字编码"   autocomplete="off" placeholder="" class="layui-input">',
 										'  </div>',
 										' </div>',
 										'<div class="layui-form-item">',
@@ -456,9 +457,9 @@
 
 							//删除协议类型					
 							function saveDelForm(url,parsm,successMsg, failureMsg) {
-								common.del(url, parsm, function(result) {
+								common.del(url, parsm, function(data) {
 									console.log(result)
-									if(result.code == 203) { //删除成功
+									if(data.code == 203) { //删除成功
 										layer.alert(successMsg, {
 											icon: 1
 										}, function(index) {
@@ -606,7 +607,7 @@
 												icon: 1
 											}, function(index) {
 												//重载表格
-												table.reload('cold');
+												table.reload('personal');
 												layer.close(index); //关闭成功提示弹框
 												layer.close(coldLayerIndex); //保存成功关闭tab弹出层
 											})
@@ -630,7 +631,7 @@
 										}, function(index) {
 											layer.close(index);
 											//重载表格
-											table.reload('cold');
+											table.reload('personal');
 											layer.close(tabIndex); //保存成功关闭tab弹出层
 										// window.location.href="Ageree.html";
 										})
@@ -652,14 +653,15 @@
 									"is_enable": obj.elem.checked
 								}
 								console.log(url, parsm)
-								common.put(url, parsm,function(result) {
-										if(result.code == 202) { //修改成功
+								common.put(url, parsm,function(data) {
+										if(data.code == 202) { //修改成功
 											layer.tips(obj.value + ' 启用' + '：' + obj.elem.checked, obj.othis);
 											layer.alert("成功", {
 												icon: 1
 											}, function(index) {
-												table.reload('cold');
 												layer.close(index);
+												table.reload('personal');												
+												layer.close(tabIndex);
 											})
 										} else {
 											layer.alert("失败", {
