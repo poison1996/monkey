@@ -16,7 +16,8 @@
 		</script>
 		<script type="text/javascript" src="../js/lay/modules/laydate.js">
 		</script>
-		<script type="text/javascript" src="../js/url-config.js">		</script>
+		<script type="text/javascript" src="../js/url-config.js">
+		</script>
 		<style type="text/css">
 			.layui-input-block {
 				margin-left: 130px;
@@ -26,6 +27,7 @@
 			.layui-form-label {
 				width: 120px;
 				padding: 0px;
+				padding-top: 10px;
 			}
 		</style>
 	</head>
@@ -40,7 +42,7 @@
 				<div class="layui-side-scroll">
 					<div id="tree" style=" width: 200px;">
 					</div>
-				<script>
+					<script>
 						loadMenuTree();
 
 						layui.use('element', function() {
@@ -101,7 +103,7 @@
 							//将多cookie切割为多个名/值对
 							var arrcookie = strcookie.split("; ");
 							//遍历cookie数组，处理每个cookie对
-							for(var i = 0; i < arrcookie.length; i++) {     
+							for(var i = 0; i < arrcookie.length; i++) {
 								arr = arrcookie[i].split("=");
 								obj = document.getElementById(arr[0]);
 								if(obj != null) {
@@ -117,37 +119,38 @@
 							}
 						}
 					</script>
-		</div>
+				</div>
 			</div>
 			<div class="layui-body">
 				<div class="layui-bodys">
 					<div style="padding-bottom: 10px;">
-						<button class="layui-btn  ADD_dt_id">添加字典类型</button>
-						<button class="layui-btn  ADD_dd_id">添加dd_id</button>
+						<button class="layui-btn" id="btn_add_dt">添加字典类型</button>
+						<button class="layui-btn " id="btn_add_dd">添加项目</button>
 					</div>
 
 					<div style="width: 35%; float: left;">
-						<table class="layui-hide" id="dictionary_typesGrid" lay-filter="dictionary_typesGrid"></table>
-						<script type="text/html" id="dicType_colstoolbar">
+						<!--字典类型表格-->
+						<table class="layui-hide" id="grid_dt" lay-filter="grid_dt"></table>
+						<script type="text/html" id="colstoolbar_dt">
 							<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
 							<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
 						</script>
 					</div>
 
 					<div style="width: 64%; padding-left: 1%; float: left;">
-						<table class="layui-hide" id="cold" lay-filter="cold"></table>
-						<script type="text/html" id="colstoolbar">
+						<table class="layui-hide" id="grid_dd" lay-filter="grid_dd"></table>
+						<script type="text/html" id="colstoolbar_dd">
 							<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
 							<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
 						</script>
 					</div>
-					
+
 					<div style="float: left; width:100%;">
-						 <blockquote class="layui-elem-quote">
-						 	注意：<br />
-						 	1.不可轻易删除更改字典表<br />
-						 	
-						 </blockquote>
+						<blockquote class="layui-elem-quote">
+							注意：<br /> 1.不可轻易删除更改字典表
+							<br />
+
+						</blockquote>
 					</div>
 
 				</div>
@@ -157,7 +160,58 @@
 				© 猿知识网址
 			</div>
 		</div>
-		<!-- dt_id -->
+		<!--添加字典类型表单-->
+		<script type="text/html" id="content_dt">
+			<div style="padding:20px;">
+				<form class="layui-form" lay-filter="form_dt">
+					<div class="layui-form-item">
+						<label class="layui-form-label">字典类型名称：</label>
+						<div class="layui-input-block">
+							<input type="text" name="dict_name" lay-verify="required" maxlength="10" autocomplete="off" placeholder="" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">字典类型编码：</label>
+						<div class="layui-input-block">
+							<input type="text" name="dict_value" lay-verify="number" maxlength="10" autocomplete="off" placeholder="" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<div class="layui-input-block"> <button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</script>
+		<!--添加、修改字典表单-->
+		<script type="text/html" id="content_dd">
+			<div style="padding:20px;">
+				<form class="layui-form" lay-filter="form_dd">
+					<div class="layui-form-item">
+						<label class="layui-form-label">字典类型：</label>
+						<div class="layui-input-block">
+							<input type="text" name="dict_name" id="dict_name" lay-verify="required" readonly="readonly" class="layui-input" />
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">项目：</label>
+						<div class="layui-input-block">
+							<input type="text" name="dict_data_name" lay-verify="required" maxlength="50" autocomplete="off" placeholder="" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">项目值：</label>
+						<div class="layui-input-block">
+							<input type="text" name="dict_data_value" lay-verify="number" maxlength="50" autocomplete="off" placeholder="" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<div class="layui-input-block"> <button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</script>
 		<script>
 			layui.config({
 				base: '../js/' //静态资源所在路径
@@ -173,10 +227,11 @@
 				var element = layui.element;
 				var common = layui.common;
 				var tableSelect = layui.tableSelect;
-				
-				//字典类型表格渲染
+
+				/** 字典类型*/
+				//字典类型表格
 				table.render({
-					elem: '#dictionary_typesGrid',
+					elem: '#grid_dt',
 					headers: {
 						Authorization: setter.askToken()
 					},
@@ -185,26 +240,25 @@
 						[{
 								field: 'dt_id',
 								title: 'dt_id',
+								width: 130
 							}, {
 								field: 'dict_name',
-								title: 'dict_name'
+								title: '字典类型名称',
+								minWidth: 130
 							}, {
 								field: 'dict_value',
-								title: 'dict_value',
+								title: '字典类型编码',
+								width: 150
 							}, {
 								title: '操作',
 								fixed: 'right',
-								width: 120,
+								width: 170,
 								align: 'center',
-								toolbar: '#dicType_colstoolbar'
+								toolbar: '#colstoolbar_dt'
 							}
 
 						]
 					],
-					//height: 'full-210' //高度最大化减去差值
-					/*page: {
-						layout: ['prev', 'page', 'next', 'skip', 'count']
-					},*/
 					page: true,
 					limit: 15,
 					limits: [15],
@@ -229,18 +283,62 @@
 						}
 					}
 				});
-				//保存新增字典类型的表单
-				function saveAddDicTypeForm(url, parsm, successMsg, failureMsg) {
-					common.post(url, parsm, function(result) {
-						if(result.code == 201) { //新增成功 201
+
+				//监听行工具事件,修改字典类型，删除字典类型
+				table.on('tool(grid_dt)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+					var data = obj.data //获得当前行数据
+						,
+						layEvent = obj.event; //获得 lay-event 对应的值
+					if(layEvent === 'edit') {
+						edit_dt(data); //编辑字典类型
+					} else if(layEvent === 'del') {
+						del_dt(data); //删除字典类型
+					}
+				});
+
+				/**
+				 *  修改字典类型  打开弹层
+				 * @param {Object} rowData
+				 */
+				function edit_dt(rowData) {
+					var tabIndex = layer.open({
+						title: "修改字典类型",
+						type: 1,
+						area: ['600px', '450px'],
+						content: $("#content_dt").html(),
+						success: function(layero, index) {
+							form.val('form_dt', rowData) //赋值表单
+							//监听表单提交事件
+							form.on('submit(btn_save)', function(data) {
+								var url = setter.requestUrl + "/dictionary_types/" + rowData.dt_id;
+								var params = data.field
+								var successMsg = "修改" + params.dict_name + "成功";
+								var failureMsg = "修改" + params.dict_name + "失败";
+								save_edit_dt(url, params, successMsg, failureMsg, tabIndex);
+								return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+							});
+						}
+					});
+				}
+				/**
+				 * 修改字典类型  保存数据
+				 * @param {Object} url 接口
+				 * @param {Object} params 参数
+				 * @param {Object} successMsg 成功提示
+				 * @param {Object} failureMsg 失败提示
+				 * @param {Object} tabIndex 表单弹层
+				 */
+				function save_edit_dt(url, params, successMsg, failureMsg, tabIndex) {
+					common.put(url, params, function(result) {
+						console.log(url, params, result)
+						if(result.code == 201) { //修改成功
 							layer.alert(successMsg, {
 								icon: 1
 							}, function(index) {
-								layer.close(index);
-								//重载表格
-								table.reload('dictionary_types');
-
+								layer.close(index); //关闭自身
 								layer.close(tabIndex); //保存成功关闭tab弹出层
+								table.reload('grid_dt'); //重载表格 字典类型
+								table.reload('grid_dd'); //刷新字典表格
 							})
 						} else {
 							layer.alert(failureMsg, {
@@ -251,155 +349,43 @@
 						}
 					});
 				}
-				//新增字典类型表单 dt 
-				function addDicTypeForm() {
-					//监听表单提交事件
-					form.on('submit(btn_save)', function(data) {
-						var url = setter.requestUrl + "/dictionary_types";
-						var parsm = data.field
-						parsm.creator_id = setter.user_id(setter.tableName)
-						var successMsg = "成功";
-						var failureMsg = "失败";
-						console.log(url, JSON.stringify(parsm));
-						saveAddDicTypeForm(url, parsm, successMsg, failureMsg);
-						return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
-					});
-
-				}
-				//弹出一个增加字典类型表单提示层
-				$('.ADD_dt_id').on('click', function() {
-					tabIndex = layer.open({
-						type: 1,
-						title: "新增字典类型",
-						area: ['500px', '350px'],
-						shadeClose: true, //点击遮罩关闭
-						content: ['<div style="padding:20px;">',
-							'<form  class="layui-form" lay-filter="addAdForm">',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">字典类型名称：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_name" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							' </div>',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">字典类型值：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_value" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							' </div>',
-
-							'<div class="layui-form-item">',
-							'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
-							'	</div>', '</div>',
-							'</form>',
-							'</div>'
-						].join(''),
-						success: function(layero, index) {
-							addDicTypeForm(); //新增字典类型表单
+				/**
+				 * 删除字典类型 提示
+				 * @param {Object} data 
+				 */
+				function del_dt(data) {
+					layer.confirm('真的删除 ' + data.dict_name + ' 吗？', {
+						icon: 0
+					}, function(index) {
+						//obj.del(); //删除对应行（tr）的DOM结构
+						var url = setter.requestUrl + "/dictionary_types/" + data.dt_id;
+						var params = {
+							'delete': true
 						}
-					});
-				});
-				//表单  //修改字典类型
-				/*function adForm(formName, data) {
-					var tbData = data
-					form.val(formName, data); //赋值表单
-					//监听表单提交事件
-					form.on('submit(btn_save)', function(data) {
-						var url = setter.requestUrl + "/dictionary_types/"; //+ data.dt_id; 
-						var parsm = data.field
-						var successMsg = "成功";
-						var failureMsg = "失败";
-						console.log(url, JSON.stringify(parsm));
-						saveForm(url, parsm, successMsg, failureMsg);
-						return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
-					});
-
-				}*/
-				//修改字典类型
-				function updateDicTypeForm(field) {
-					//监听表单提交事件
-					form.on('submit(btn_save)', function(data) {
-						var url = setter.requestUrl + "/dictionary_types/" + field.dt_id;
-						var parsm = data.field
-						var successMsg = "成功";
-						var failureMsg = "失败";
-						console.log(url, JSON.stringify(parsm));
-						saveUpdateForm(url, parsm, successMsg, failureMsg);
-						return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+						var successMsg = "删除" + data.dict_name + "成功";
+						var failureMsg = "删除" + data.dict_name + "失败";
+						save_del_dt(url, params, successMsg, failureMsg);
+						//向服务端发送删除指令
+						layer.close(index);
 					});
 				}
-
-				var tabIndex; //弹出层修改字典类型信息
-				function openDicTypeForm(data) {
-					tabIndex = layer.open({
-						title: "修改dt_id信息",
-						type: 1,
-						area: ['600px', '450px'],
-						content: ['<div style="padding:20px;">',
-							'<form  class="layui-form" lay-filter="dicTypeForm">',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">dict_value：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_value"  autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							'</div>',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">dict_value：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_name" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							'</div>',
-							'<div class="layui-form-item">',
-							'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
-							'	</div>', '</div>',
-							'</form>',
-							'</div>'
-						].join(''),
-						success: function(layero, index) {
-							form.render(); //渲染单选框									
-							form.val('dicTypeForm', data) //赋值表单
-							updateDicTypeForm(data); //新增字典类型
-						}
-					});
-				}
-				//监听行工具事件,修改字典类型，删除字典类型
-				table.on('tool(dictionary_typesGrid)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
-					var data = obj.data //获得当前行数据
-						,
-						layEvent = obj.event; //获得 lay-event 对应的值
-					if(layEvent === 'detail') {
-						layer.msg('查看操作');
-					} else if(layEvent === 'del') {
-						layer.confirm('真的删除字典类型吗？', {
-							icon: 0
-						}, function(index) {
-							//obj.del(); //删除对应行（tr）的DOM结构
-							var url = setter.requestUrl + "/dictionary_types/" + data.dt_id;
-							var parsm = {
-								'delete': true
-							}
-							var successMsg = "成功";
-							var failureMsg = "失败";
-							saveDelForm(url, parsm, successMsg, failureMsg);
-							//向服务端发送删除指令
-							layer.close(index);
-						});
-					} else if(layEvent === 'edit') {
-						openDicTypeForm(data); //打开字典类型表单页面
-					}
-				});
-
-				//删除字典类型
-				function saveDelForm(url, parsm, successMsg, failureMsg) {
-					common.del(url, parsm, function(result) {
-						if(result.code = 201) { //删除字典类型成功
+				/**
+				 * 删除字典类型 保存
+				 * @param {Object} url 接口
+				 * @param {Object} params 参数
+				 * @param {Object} successMsg 成功提示
+				 * @param {Object} failureMsg 失败提示
+				 */
+				function save_del_dt(url, params, successMsg, failureMsg) {
+					common.del(url, params, function(data) {
+						if(data.code == 201) { //删除字典类型成功
 							layer.alert(successMsg, {
 								icon: 1
 							}, function(index) {
 								layer.close(index);
 								//重载表格
-								table.reload('dictionary_typesGrid');
-								layer.close(tabIndex); //保存成功关闭tab弹出层
+								table.reload('grid_dt');
+								table.reload('grid_dd');
 							})
 						} else {
 							layer.alert(failureMsg, {
@@ -412,86 +398,124 @@
 					})
 				}
 
-				//保存表单
-				function saveForm(url, parsm, successMsg, failureMsg) {
-					$.ajax({
-						headers: {
-							Authorization: setter.askToken
-						},
-						url: url,
-						type: "PUT",
-						data: JSON.stringify(parsm),
-						dataType: "JSON",
-						contentType: "application/json",
-						success: function(data) {
-							if(data.code == 201) { //修改成功
-								layer.alert(successMsg, {
-									icon: 1
-								}, function(index) {
-									layer.close(index);
-									//重载表格
-									table.reload('dictionary_types');
-									layer.close(tabIndex); //保存成功关闭tab弹出层
-								})
-							} else {
-								layer.alert(failureMsg, {
-									icon: 2
-								}, function(index) {
-									layer.close(index);
-								})
-							}
-						} //end success
-					}); //end ajax
+				//添加字典类型 打开弹层
+				$("#btn_add_dt").click(function() {
+					tabIndex = layer.open({
+						type: 1,
+						title: "添加字典类型",
+						area: ['500px', '350px'],
+						shadeClose: true, //点击遮罩关闭
+						content: $("#content_dt").html(),
+						success: function(layero, index) {
+							//监听表单提交事件
+							form.on('submit(btn_save)', function(data) {
+								var url = setter.requestUrl + "/dictionary_types";
+								var params = data.field
+								params.creator_id = setter.user_id(setter.tableName)
+								var successMsg = "添加" + params.dict_name + "成功";
+								var failureMsg = "添加" + params.dict_name + "失败";
+								save_add_dt(url, params, successMsg, failureMsg); //保存数据
+								return false;
+							});
+						}
+					});
+				})
+				/**
+				 * 添加字典类型  保存数据
+				 * @param {Object} url 接口
+				 * @param {Object} params 参数
+				 * @param {Object} successMsg 成功提示
+				 * @param {Object} failureMsg 失败提示
+				 */
+				function save_add_dt(url, params, successMsg, failureMsg) {
+					common.post(url, params, function(result) {
+						if(result.code == 201) { //添加成功 201
+							layer.alert(successMsg, {
+								icon: 1
+							}, function(index) {
+								layer.close(index);
+								//重载表格
+								table.reload('grid_dt');
+								layer.close(tabIndex); //保存成功关闭tab弹出层
+							})
+						} else {
+							layer.alert(failureMsg, {
+								icon: 2
+							}, function(index) {
+								layer.close(index);
+							})
+						}
+					});
 				}
 
-				/** 下面是字典js*/
-
-				//方法级渲染
+				/**
+				 * 字典
+				 */
+				//字典表格
 				table.render({
-					elem: '#cold',
+					elem: '#grid_dd',
 					url: setter.requestUrl + '/dictionary',
 					headers: {
 						Authorization: setter.askToken()
 					},
 					cols: [
 						[{
+								field: "dict_name",
+								title: "字典类型",
+								width:150,
+								minWidth: 100
+							}, {
 								field: 'dd_id',
 								title: 'dd_id',
+								width: 120
 							}, {
 								field: 'dict_data_name',
-								title: 'dict_data_name'
+								title: '项目',
+								width:150,
+								minWidth: 130
 							}, {
 								field: 'dict_data_value',
-								title: 'dict_data_value',
+								title: '项目值',
+								width: 110
 							}, {
 								field: 'create_time',
 								title: '创建时间',
+								width: 230,
 								templet: function(d) {
 									return util.toDateString(d.create_time)
 								} //解析时间
 							}, {
 								field: 'last_update_time',
 								title: '最后更新时间',
+								width: 230,
 								templet: function(d) {
 									return util.toDateString(d.last_update_time)
 								} //解析时间
 							}, {
 								title: '操作',
 								fixed: 'right',
-								width: 120,
+								width: 210,
 								align: 'center',
-								toolbar: '#colstoolbar'
+								toolbar: '#colstoolbar_dd'
 							}
 
 						]
 					],
-
 					page: true,
 					limit: 15,
+					limits: [15],
+					request: {
+						limitName: 'size' //每页数据量的参数名，默认：limit
+					},
 					parseData: function(res) { //res 即为原始返回的数据
 						if(res.data) {
 							//返回有data 数据，就设置code 为0=请求数据成功
 							res.code = 0
+						} else {
+							res.message = "暂无相关信息";
+							res.data = {
+								total: 0
+							}
 						}
 						return {
 							"code": res.code, //解析接口状态
@@ -499,175 +523,63 @@
 							"count": res.data.total, //解析数据长度
 							"data": res.data.dictionary
 						}
-					},
-
+					}
 				});
-				var tabIndex; //弹出层修改广告组信息
-				function openAdv(data) {
-					tabIndex = layer.open({
-						title: "修改dd_id信息",
-						type: 1,
-						area: ['600px', '450px'],
-						content: ['<div style="padding:20px;">',
-							'<form  class="layui-form" lay-filter="advForm">',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">dd_id名称：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_data_name" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							' </div>',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">dict_data_value：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_data_value" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							' </div>',
-							'<div class="layui-form-item">',
-							'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
-							'	</div>', '</div>',
-							'</form>',
-							'</div>'
-						].join(''),
-						success: function(layero, index) {
-
-							form.render(); //渲染单选框									
-							form.val('advForm', data) //赋值表单
-							updateAdForm(data); //新增字典类型
-						}
-					});
-				}
-
-				//新增字典
-				function addAdForm() {
-					//监听表单提交事件
-					form.on('submit(btn_save)', function(data) {
-						var url = setter.requestUrl + "/dictionary_data";
-						var parsm = data.field
-						parsm.creator_id = setter.user_id(setter.tableName);
-						var successMsg = "成功";
-						var failureMsg = "失败";
-
-						console.log(url, JSON.stringify(parsm));
-						saveAddForm(url, parsm, successMsg, failureMsg);
-						return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
-					});
-
-				}
-				//保存表单
-				function saveUpdateForm(url, parsm, successMsg, failureMsg) {
-					common.put(url, parsm, function(data) {
-						if(data.code == 201) { //201 修改成功
-							layer.alert(successMsg, {
-								icon: 1
-							}, function(index) {
-								layer.close(index);
-								//重载表格
-								table.reload('dictionary_typesGrid');
-								layer.close(tabIndex); //保存成功关闭tab弹出层
-							})
-						} else {
-							layer.alert(failureMsg, {
-								icon: 2
-							}, function(index) {
-								layer.close(index);
-							})
-						}
-					});
-				}
-
-				//修改dd_id
-				function updateAdForm(field) {
-					//监听表单提交事件
-					form.on('submit(btn_save)', function(data) {
-						var url = setter.requestUrl + "/dictionary_data/" + field.dd_id;
-						var parsm = data.field
-						var successMsg = "成功";
-						var failureMsg = "失败";
-						console.log(url, JSON.stringify(parsm));
-						saveUpdateForm(url, parsm, successMsg, failureMsg);
-						return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
-					});
-
-				}
-				//表单  //修改dd_id
-				function adForm(formName, data) {
-					var tbData = data
-					form.val(formName, data); //赋值表单
-					//监听表单提交事件
-					form.on('submit(btn_save)', function(data) {
-						var url = setter.requestUrl + "/dictionary_data/"; //+ data.dt_id; 
-						var parsm = data.field
-						var successMsg = "成功";
-						var failureMsg = "失败";
-						console.log(url, JSON.stringify(parsm));
-						saveForm(url, parsm, successMsg, failureMsg);
-						return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
-					});
-
-				}
-
-				function saveForm(url, parsm, successMsg, failureMsg) {
-					common.post(url, parsm, function(result) {
-						console.log(parsm)
-						if(result.code == 201) { // 新增成功
-							layer.alert(successMsg, {
-								icon: 1
-							}, function(index) {
-								layer.close(index);
-								//重载表格
-								table.reload('cold');
-								layer.close(tabIndex); //保存成功关闭tab弹出层
-							})
-						} else {
-							layer.alert(failureMsg, {
-								icon: 2
-							}, function(index) {
-								layer.close(index);
-							})
-						}
-					});
-				}
-
-				//监听行工具事件，删除dd_id
-				table.on('tool(cold)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+				//监听行工具事件，修改、删除字典
+				table.on('tool(grid_dd)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
 					var data = obj.data //获得当前行数据
 						,
 						layEvent = obj.event; //获得 lay-event 对应的值
-					if(layEvent === 'detail') {
-						layer.msg('查看操作');
+					if(layEvent === 'edit') {
+						edit_dd(data); //修改字典
 					} else if(layEvent === 'del') {
-						layer.confirm('真的删除dd_id吗？', {
-							icon: 0
-						}, function(index) {
-							//obj.del(); //删除对应行（tr）的DOM结构
-							var url = setter.requestUrl + "/dictionary_data/" + data.dd_id;
-							var parsm = {
-								'delete': true
-							}
-							var successMsg = "成功";
-							var failureMsg = "失败";
-							saveDelForm(url, parsm, successMsg, failureMsg);
-							//向服务端发送删除指令
-							layer.close(index);
-						});
-					} else if(layEvent === 'edit') {
-						openAdv(data)
+						del_dd(data); //删除字典
 					}
 				});
-
-				//保存表单
-				function saveAddForm(url, parsm, successMsg, failureMsg) {
-					common.post(url, parsm, function(result) {
-						if(result.code == 201) { //新增成功 202 修改成功
+				/**
+				 * 修改字典 打开弹层
+				 * @param {Object} rowData 行数据
+				 */
+				function edit_dd(rowData) {
+					//弹出层修改广告组信息
+					var tabIndex = layer.open({
+						title: "修改项目信息",
+						type: 1,
+						area: ['600px', '450px'],
+						content: $("#content_dd").html(),
+						success: function(layero, index) {
+							form.val('form_dd', rowData) //赋值表单
+							//监听表单提交事件
+							form.on('submit(btn_save)', function(data) {
+								var url = setter.requestUrl + "/dictionary_data/" + rowData.dd_id;
+								var params = data.field
+								var successMsg = "修改 " + params.dict_data_name + " 成功";
+								var failureMsg = "修改 " + params.dict_data_name + " 失败";
+								save_eidt_dd(url, params, successMsg, failureMsg, tabIndex);
+								return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+							});
+						}
+					});
+				}
+				/**
+				 * 修改字典  保存数据
+				 * @param {Object} url 接口
+				 * @param {Object} params 参数
+				 * @param {Object} successMsg 成功提示
+				 * @param {Object} failureMsg 失败提示
+				 * @param {Object} tabIndex 表单弹层
+				 */
+				function save_eidt_dd(url, params, successMsg, failureMsg, tabIndex) {
+					common.put(url, params, function(result) {
+						console.log(url, params, result)
+						if(result.code == 201) { //201 修改成功
 							layer.alert(successMsg, {
 								icon: 1
 							}, function(index) {
 								layer.close(index);
-								//重载表格
-								table.reload('cold');
-								table.reload('dictionary_typesGrid');
-								
 								layer.close(tabIndex); //保存成功关闭tab弹出层
+								//重载表格
+								table.reload('grid_dd');
 							})
 						} else {
 							layer.alert(failureMsg, {
@@ -678,65 +590,86 @@
 						}
 					});
 				}
-				//增加dd_id
-				//弹出一个提示层
-				$('.ADD_dd_id').on('click', function() {
+				/**
+				 * 删除字典 提示
+				 * @param {Object} data
+				 */
+				function del_dd(data) {
+					layer.confirm('真的删除 ' + data.dict_data_name + ' 吗？', {
+						icon: 0
+					}, function(index) {
+						var url = setter.requestUrl + "/dictionary_data/" + data.dd_id;
+						var params = {
+							'delete': true
+						}
+						var successMsg = "删除 " + data.dict_data_name + " 成功";
+						var failureMsg = "修改 " + data.dict_data_name + " 失败";
+						save_del_dd(url, params, successMsg, failureMsg);
+						//向服务端发送删除指令
+						layer.close(index);
+					});
+				}
+				/**
+				 * 删除字典 保存
+				 * @param {Object} url
+				 * @param {Object} params
+				 * @param {Object} successMsg
+				 * @param {Object} failureMsg
+				 */
+				function save_del_dd(url, params, successMsg, failureMsg) {
+					common.del(url, params, function(data) {
+						if(data.code == 201) { //删除字典成功
+							layer.alert(successMsg, {
+								icon: 1
+							}, function(index) {
+								layer.close(index);
+								//重载表格
+								table.reload('grid_dd');
+							})
+						} else {
+							layer.alert(failureMsg, {
+								icon: 2
+							}, function(index) {
+								layer.close(index);
+							})
+
+						}
+					})
+				}
+
+				/**
+				 * 添加字典 弹层
+				 */
+				$("#btn_add_dd").click(function() {
 					tabIndex = layer.open({
 						type: 1,
-						title: "新增dd_id",
+						title: "添加项目",
 						area: ['500px', '350px'],
 						shadeClose: true, //点击遮罩关闭
-						content: ['<div style="padding:20px;">',
-							'<form  class="layui-form" lay-filter="addAdForm">',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">dict_name：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_value" id="dic_type" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							' </div>', '<div class="layui-form-item">',
-							' <label class="layui-form-label">dd_id名称：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_data_name" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							' </div>',
-							'<div class="layui-form-item">',
-							' <label class="layui-form-label">dict_data_value：</label>',
-							' <div class="layui-input-block">',
-							' <input type="text" name="dict_data_value" lay-verify="required" autocomplete="off" placeholder="" class="layui-input">',
-							'  </div>',
-							' </div>',
-							'<div class="layui-form-item">',
-							'	<div class="layui-input-block">', '		<button class="layui-btn" type="button" lay-submit lay-filter="btn_save">提交</button>',
-							'	</div>', '</div>',
-							'</form>',
-							'</div>'
-						].join(''),
-
+						content: $("#content_dd").html(),
 						success: function(layero, index) {
-							form.render('radio');
-							selectTable(); //渲染字典类型下拉表格框
-							//把字典类型添加进dd_id里面
+							selectTable_dt(); //渲染字典类型下拉表格框
 							form.on('submit(btn_save)', function(data) {
 								var url = setter.requestUrl + '/dictionary_data';
-								var parsm = data.field;
-								parsm.dict_value = $("#dic_type").attr("ts-selected"); //获取字典类型下拉表格的选中值
-								parsm.creator_id = setter.user_id(setter.tableName);
-								var successMsg = "成功";
-								var failureMsg = "失败";
-								console.log(url, JSON.stringify(parsm));
-								saveAddForm(url, parsm, successMsg, failureMsg);
+								var params = data.field;
+								params.dict_value = $("#dict_name").attr("ts-selected"); //获取字典类型下拉表格的选中值
+								params.creator_id = setter.user_id(setter.tableName);
+								var successMsg = "添加" + params.dict_data_name + "成功";
+								var failureMsg = "添加" + params.dict_data_name + "失败";
+								var existMsg = params.dict_data_name + " 字典数据名称已存在";
+								save_add_dd(url, params, successMsg, existMsg, failureMsg, tabIndex);
 								return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
 							});
-							//addAdForm(); //新增广告表单
 						}
 					});
+				})
 
-				});
-
-				//下拉框表格
-				function selectTable() {
+				/**
+				 * 添加字典  下拉框字典类型表格 
+				 */
+				function selectTable_dt() {
 					tableSelect.render({
-						elem: '#dic_type',
+						elem: '#dict_name',
 						headers: {
 							Authorization: setter.askToken()
 						},
@@ -753,7 +686,6 @@
 										total: 0
 									}
 								}
-
 								return {
 									"code": res.code, //解析接口状态
 									"msg": res.message, //解析提示文本
@@ -772,34 +704,53 @@
 									},
 									{
 										field: 'dict_name',
-										title: 'dict_name',
+										title: '字典类型',
 										width: '400'
 									}
 								]
-							]
+							],
+							page: true,
+							limit: 10,
+							limits:[10],
+							request: {
+								limitName: 'size' //每页数据量的参数名，默认：limit
+							}
 						},
-
 						done: function(elem, data) {
 							var NEWJSON = []
-							var dict_value;
 							layui.each(data.data, function(index, item) {
-								NEWJSON.push(item.dict_name) //真的记得改了吗？？？？
+								NEWJSON.push(item.dict_name) //显示在输入框的值
 							})
 							elem.val(NEWJSON.join(","))
 						}
 					})
 				}
 
-				function saveDelForm(url, parsm, successMsg, failureMsg) {
-					common.del(url, parsm, function(result) {
-						if(result.code == 201) { //删除成功
+				/**
+				 * 添加字典 保存数据
+				 * @param {Object} url 接口
+				 * @param {Object} params 参数
+				 * @param {Object} successMsg 成功提示
+				 * @param {Object} existMsg 存在提示
+				 * @param {Object} failureMsg 失败提示
+				 * @param {Object} tabIndex 弹层
+				 */
+				function save_add_dd(url, params, successMsg, existMsg, failureMsg, tabIndex) {
+					common.post(url, params, function(data) {
+						if(data.code == 201) { //添加成功
 							layer.alert(successMsg, {
 								icon: 1
 							}, function(index) {
 								layer.close(index);
-								//重载表格
-								table.reload('cold');
 								layer.close(tabIndex); //保存成功关闭tab弹出层
+								//重载表格
+								table.reload('grid_dd');
+							})
+						} else if(data.code == 1025) {
+							layer.alert(existMsg, {
+								icon: 2
+							}, function(index) {
+								layer.close(index);
 							})
 						} else {
 							layer.alert(failureMsg, {
