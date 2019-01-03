@@ -8,8 +8,7 @@
 		<link rel="stylesheet" type="text/css" href="../css/layui.css" />
 		<link rel="stylesheet" type="text/css" href="../css/modules/layer/default/layer.css" />
 		<script type="text/javascript" src="../js/jquery-3.1.1.min.js"></script>
-		<script type="text/javascript" src="../js/layui.js">
-		</script>
+		<script type="text/javascript" src="../js/layui.js">		</script>
 		<script type="text/javascript" src="../js/lay/modules/layer.js"></script>
 		<script type="text/javascript" src="../js/url-config.js">		</script>
 		<style>
@@ -168,6 +167,10 @@
 								<td id="summary"></td>
 							</tr>
 							<tr>
+								<td>封面图片：</td>
+								<td id="images"></td>
+							</tr>
+							<tr>
 								<td>完整作品：</td>
 								<td id="resource_file"></td>
 							</tr>
@@ -225,6 +228,24 @@
 					$("#price").text(object.price); //价格
 					$("#file_type_name").text(object.file_type_name); //产品类型
 					$("#summary").text(object.summary); //产品简介
+					addimage(object); //添加图片
+//					$("#images").html('<img style="display:inline-block;max-width:700px;" layer-src="'objject.images.big_file_url'" src="'objject.images.big_file_url'"/>')
+//					
+					
+						//添加图片
+					function addimage(object) {
+						var logo_image = [];
+						logo_image.push('<img style="display: inline-block; max-width:500px" layer-src=' + object.images.big_file_url + ' src= ' + object.images.big_file_url + '>');
+						$("#images").html(logo_image.join(''));
+						//绑定图片放大事件
+						layer.photos({
+							photos: '#images',
+							anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+						});
+					} 
+					
+					
+					
 					var resource_file;
 					if(object.resource_file) {
 						checkFileExt(object.resource_file.file_name)
@@ -236,9 +257,8 @@
 					var sample_url;
 					if(object.sample_resource) {
 						sample_url = getSource(object.sample_resource.sample_file_url, object.sample_resource.sample_file_name)
-
 					} else {
-						sample_url = "无产品样例	";
+						sample_url = "无产品样例";
 					}
 					$("#sample_resource").html(sample_url); //产品样例	
 					$("#pub_time").text(util.toDateString(object.pub_time)); //发布时间
@@ -247,14 +267,10 @@
 					addButton(object.audit_state_name); //添加按钮
 					//绑定图片放大事件
 					layer.photos({
-						photos: '#shop_logo_image',
+						photos: '#images',
 						anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
 					});
-					//绑定图片放大事件
-					layer.photos({
-						photos: '#auth_front_image',
-						anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
-					});
+					
 				}
 				var fileExt = {
 					image: ["jpg", "png", "gif"],
@@ -315,6 +331,9 @@
 				function getAlabel(fileUrl, fileName) {
 					return '<a href="' + fileUrl + '" download="' + fileName + '">' + fileName + '</a>';
 				}
+				
+				
+				
 				//添加按钮
 				function addButton(audit_state_name) {
 					//审核状态按钮
