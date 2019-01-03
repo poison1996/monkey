@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -100,7 +101,7 @@
 							//将多cookie切割为多个名/值对
 							var arrcookie = strcookie.split("; ");
 							//遍历cookie数组，处理每个cookie对
-							for(var i = 0; i < arrcookie.length; i++) {     
+							for(var i = 0; i < arrcookie.length; i++) {     
 								arr = arrcookie[i].split("=");
 								obj = document.getElementById(arr[0]);
 								if(obj != null) {
@@ -219,7 +220,9 @@
 										layer.alert(successMsg, {
 											icon: 1
 										}, function(index) {
-											layer.close(index);
+										//	layer.close(index);
+										window.location.href = "Ageree.html";
+
 										})
 									} else {
 										layer.alert(failureMsg, {
