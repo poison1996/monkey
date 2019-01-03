@@ -243,54 +243,7 @@
 
 				});
 
-				//广告列表搜索
-				tableSelect.render({
-					elem: '#BannerRem',
-					checkedKey: 'id',
-					table: {
-						url: setter.requestUrl + '/backstage/advertisements',
-						parseData: function(res) { //res 即为原始返回的数据
-							console.log(res)
-							if(res.data) {
-								//返回有data 数据，就设置code 为0=请求数据成功
-								res.code = 0
-							}
-							return {
-								"code": res.code, //解析接口状态
-								"msg": res.message, //解析提示文本
-								"count": res.data.total, //解析数据长度
-								"data": res.data.advertisements //解析数据列表（记得改advertisements）
-							}
-						},
-						limit: 10,
-						limits: [10],
-						request: {
-							limitName: 'size' //每页数据量的参数名，默认：limit
-						},
-						cols: [
-							[{
-									type: 'radio'
-								},
-								{
-									field: 'id',
-									title: '广告ID'
-								},
-								{
-									field: 'ad_name',
-									title: '广告名字'
-								}
-							]
-						]
-					},
 
-					done: function(elem, data) {
-						var NEWJSON = []
-						layui.each(data.data, function(index, item) {
-							NEWJSON.push(item.username)
-						})
-						elem.val(NEWJSON.join(","))
-					}
-				})
 
 				//监听行工具事件，删除广告
 				table.on('tool(personal)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
@@ -456,6 +409,11 @@
 									"count": res.data.total, //解析数据长度
 									"data": res.data.advertisements //解析数据列表（记得改advertisements）
 								}
+							},
+							limit: 10,
+							limits: [10],
+							request: {
+								limitName: 'size' //每页数据量的参数名，默认：limit
 							},
 							cols: [
 								[{
