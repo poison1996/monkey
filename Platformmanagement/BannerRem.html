@@ -15,7 +15,8 @@
 		</script>
 		<script type="text/javascript" src="../js/cos-js-sdk-v5.js">
 		</script>
-		<script type="text/javascript" src="../js/url-config.js">		</script>
+		<script type="text/javascript" src="../js/url-config.js">
+		</script>
 		<style type="text/css">
 			.layui-input-block {
 				margin-left: 130px;
@@ -96,7 +97,7 @@
 							//将多cookie切割为多个名/值对
 							var arrcookie = strcookie.split("; ");
 							//遍历cookie数组，处理每个cookie对
-							for(var i = 0; i < arrcookie.length; i++) {     
+							for(var i = 0; i < arrcookie.length; i++) {
 								arr = arrcookie[i].split("=");
 								obj = document.getElementById(arr[0]);
 								if(obj != null) {
@@ -199,13 +200,13 @@
 								field: 'advertisement_start_time',
 								title: '开始时间',
 								templet: function(d) {
-									return util.toDateString(d.advertisement_start_time,"yyyy-MM-dd")
+									return util.toDateString(d.advertisement_start_time, "yyyy-MM-dd")
 								} //解析时间
 							}, {
 								field: 'advertisement_end_time',
 								title: '结束时间',
 								templet: function(d) {
-									return util.toDateString(d.advertisement_end_time,"yyyy-MM-dd")
+									return util.toDateString(d.advertisement_end_time, "yyyy-MM-dd")
 								}
 							},
 							{
@@ -222,7 +223,7 @@
 					limits: [15],
 					request: {
 						limitName: 'size' //每页数据量的参数名，默认：limit
-					},
+					}, 
 					parseData: function(res) { //res 即为原始返回的数据
 						if(res.data) {
 							//返回有data 数据，就设置code 为0=请求数据成功
@@ -287,8 +288,8 @@
 							'	</div>', '</div>', '</form>'
 						].join(''),
 						success: function(layero, index) {
-							data.advertisement_start_time=util.toDateString(data.advertisement_start_time,"yyyy-MM-dd")
-							data.advertisement_end_time=util.toDateString(data.advertisement_end_time,"yyyy-MM-dd")
+							data.advertisement_start_time = util.toDateString(data.advertisement_start_time, "yyyy-MM-dd")
+							data.advertisement_end_time = util.toDateString(data.advertisement_end_time, "yyyy-MM-dd")
 							adForm("productAdForm", data); //产品广告表单
 							selectTable_products();
 							laydate.render({
@@ -301,7 +302,7 @@
 								type: 'date',
 								trigger: 'click'
 							});
-							
+
 						}
 					});
 				}
@@ -320,7 +321,7 @@
 							'</div>',
 							'</div>',
 							'<div class="layui-form-item">',
-							'	<label class="layui-form-label">需求ID：</label>',
+							'	<label class="layui-form-label">广告ID：</label>',
 							'	<div class="layui-input-block">',
 							'		<input type="text" name="id" id="object_id" required lay-verify="required" placeholder="请输入需求ID" autocomplete="off" class="layui-input">',
 							'	</div>',
@@ -355,6 +356,8 @@
 							'	</div>', '</div>', '</form>'
 						].join(''),
 						success: function(layero, index) {
+							data.advertisement_start_time = util.toDateString(data.advertisement_start_time, "yyyy-MM-dd")
+							data.advertisement_end_time = util.toDateString(data.advertisement_end_time, "yyyy-MM-dd")
 							selectTable_customizeds();
 							laydate.render({
 								elem: '#advertisement_start_time', //指定元素
@@ -416,6 +419,8 @@
 							'</form>'
 						].join(''),
 						success: function(layero, index) {
+							data.advertisement_start_time = util.toDateString(data.advertisement_start_time, "yyyy-MM-dd")
+							data.advertisement_end_time = util.toDateString(data.advertisement_end_time, "yyyy-MM-dd")
 							adForm("externalAdForm", data); //产品广告表单
 							laydate.render({
 								elem: '#advertisement_start_time', //指定元素
@@ -536,6 +541,11 @@
 									"data": res.data.advertisements //解析数据列表（记得改advertisements）
 								}
 							},
+							limit: 10,
+					limits: [10],
+					request: {
+						limitName: 'size' //每页数据量的参数名，默认：limit
+					}, 
 							cols: [
 								[{
 										type: 'radio'
@@ -575,8 +585,7 @@
 					form.on('submit(btn_save)', function(data) {
 						var url = setter.requestUrl + "/backstage/advertisements/ids/" + tbData.id; ///backstage/advertisements/
 						var parsm = data.field
-						
-					
+
 						parsm.advertisement_start_time = Date.parse(parsm.advertisement_start_time) - (8 * 60 * 60 * 1000); //开始日期
 						parsm.advertisement_end_time = Date.parse(parsm.advertisement_end_time) - (8 * 60 * 60 * 1000); //28800000 8小时 毫秒数结束日期
 						parsm.is_enable = 1 //活动
@@ -634,24 +643,14 @@
 
 				//上传文件
 				function uploadFiles(ImgName, SelectedImg, elemName) {
-					//上传
-					var cos = new COS({
-						SecretId: 'AKIDDMOSOBJcO1S5b0ocfWEmCA2jEkCXfusR',
-						SecretKey: '75sUuCJGGLNHzZ7UiojS4VknjYNLKFEL',
-					});
-
-					//上传图片
-					cos.putObject({
-						Bucket: 'mk-1257423844', //存储桶
-						Region: 'ap-guangzhou',
-						Key: '/images/' + ImgName, //图片名
-						Body: SelectedImg, //图片信息
-						onProgress: function(progressData) {
-							console.log("上传成功");
-						}
-					}, function(err, data) {
+					var url = setter.imgPath + ImgName; //目录文件名
+					var body = SelectedImg; //文件对象
+					//上传图片						
+					common.uploadFile(url, body, null, function(progressData) {
 						$(elemName).val(setter.imgUrl + ImgName);
-					});
+						console.log("上传成功");
+					})
+
 				}
 
 				//外部广告=3  我是需求=2 产品广告=1
@@ -752,6 +751,11 @@
 									"data": res.data.products //解析数据列表（记得改advertisements）
 								}
 							},
+							limit: 10,
+					limits: [10],
+					request: {
+						limitName: 'size' //每页数据量的参数名，默认：limit
+					}, 
 							cols: [
 								[{
 										type: 'radio'
