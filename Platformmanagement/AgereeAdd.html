@@ -251,35 +251,7 @@
 								return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
 							});
 
-							//提交表单
-							//							function saveAddForm(url, parsm, successMsg, failureMsg) {
-							//								$.ajax({
-							//									headers:{
-							//									Authorization:setter.askToken
-							//								},
-							//									url: url,
-							//									type: "POST",
-							//									data: JSON.stringify(parsm),
-							//									dataType: "JSON",
-							//									contentType: "application/json",
-							//									success: function(data) {
-							//										if(data.code == 201) { //新增成功
-							//											layer.alert(successMsg, {
-							//												icon: 1
-							//											}, function(index) {
-							//												layer.close(index);
-							//											})
-							//										} else {
-							//											layer.alert(failureMsg, {
-							//												icon: 2
-							//											}, function(index) {
-							//												layer.close(index);
-							//											})
-							//										}
-							//									} //end success
-							//									
-							//								}); //end ajax
-							//							}
+							
 							function saveAddForm(url, parsm, successMsg, failureMsg) {
 								common.post(url, parsm, function(result) {
 									if(result.code == 201) { //新增成功 202 
