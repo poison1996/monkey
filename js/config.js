@@ -41,7 +41,7 @@ layui.define(['laytpl', 'layer', 'element', 'util', 'laydate'], function(exports
 		},
 		dic_order_state_code: { //订单交易里面的后台给的状态返回前端处理
 			"16": "下单未付款",
-			"17": "订单未完成",
+			"17": "订单已完成",
 			"18": "订单已取消",
 			"19": "已评价",
 			"20": "待评价",
