@@ -8,7 +8,12 @@ layui.define(['laytpl', 'layer', 'element', 'util', 'laydate'], function(exports
 	//	requestUrl: 'http://139.199.72.65:8850/v1/mk',
 		requestUrl: 'http://123.207.96.219:8850/v1/mk',
 		imgUrl: 'https://mk-1257423844.cos.ap-guangzhou.myqcloud.com/images/', //图片接口路径
-		//askToken:tokenType+" "+token,
+		// 上传的cos 对象
+		cos:{
+				SecretId: 'AKIDDMOSOBJcO1S5b0ocfWEmCA2jEkCXfusR',//开发者拥有的项目身份识别 ID，用以身份认证
+				SecretKey: '75sUuCJGGLNHzZ7UiojS4VknjYNLKFEL',//开发者拥有的项目身份密钥
+		},
+		imgPath:'/images/',//上传图片 的路径
 		askToken: function() {
 			if(token) {
 				return tokenType + " " + token;
@@ -86,6 +91,31 @@ layui.define(['laytpl', 'layer', 'element', 'util', 'laydate'], function(exports
 			67: "定制需求完成支付",
 			68: "产品完成交易",
 		}, 
+		/**
+		 * 上传文件 腾讯存储桶
+		 * @param {Object} url// 存储文件的地址
+		 * @param {Object} body //文件对象 
+		 * @param {Object} onProgress 上传进度回调函数 
+		 * @param {Object} callBack  上传成功回调函数
+		 */
+		uploadFile: function(url, body, onProgress, callBack) {
+			//上传
+			var cos = new COS(setter.cos);
+			cos.putObject({
+				Bucket: 'mk-1257423844', //COS 中用于存储数据的容器
+				Region: 'ap-guangzhou', //域名中的地域信息
+				Key: url, //
+				Body: body, //文件对象 
+				onProgress: function(progressData) {
+					//上传进度
+					onProgress(progressData);
+				}
+			}, function(err, data) {
+				//上传结果
+				callBack(err, data);
+			});
+
+		}
 
 	});
 });
