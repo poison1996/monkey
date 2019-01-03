@@ -85,7 +85,7 @@ layui.define(['laytpl', 'layer', 'element', 'util', 'laydate'], function(exports
 		dic_remit_reson_code: {
 			67: "定制需求完成支付",
 			68: "产品完成交易",
-		},
+		}, 
 
 	});
 });
